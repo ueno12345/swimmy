@@ -1,3 +1,10 @@
+#
+# Yuuki Fujiwara / nomlab
+#
+# This is a part of https://github.com/nomlab/swimmy
+#
+
+
 # coding: utf-8
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
