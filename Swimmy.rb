@@ -4,12 +4,17 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'sinatra'
 require 'SlackBot'
 require 'FBot'
+require 'Amebot'
 
 class Swimmy < SlackBot
   include FBot
+  include Amebot
   def help_respond(params, options = {})
     # Add help comments
-    text = "「〇〇」と言って or (移動手段)での(出発地点)から(到着地点)までの道"
+    text = "
+・「〇〇」と言って\n
+・(移動手段)での(出発地点)から(到着地点)までの道\n
+・〇〇の雨の状況\n"
     return {text: text}.merge(options).to_json
   end
 end
@@ -31,6 +36,9 @@ post '/slack' do
   elsif (params[:text] =~ /.*での.*から.*までの道/) then
     # FBot
     slackbot.distance_respond(params, username: "swimmy")
+  elsif (params[:text] =~ /雨の状況/) then
+    # Amebot
+    slackbot.rain_info(params,username: "swimmy")
 
     # elsif
     # elsif
