@@ -9,7 +9,7 @@ class Swimmy < SlackBot
   include FBot
   def help_respond(params, options = {})
     # Add help comments
-    text = "「〇〇」と言って or (移動手段)での(出発地点)から(到着地点)までの道"
+    text = "「〇〇」と言って or (移動手段)での(出発地点)から(到着地点)までの道 or get issue or make issue (t:title)[b:body]"
     return {text: text}.merge(options).to_json
   end
 end
@@ -37,10 +37,8 @@ post '/slack' do
     # elsif
     # elsif
     # elsif
-  
+
   else
     slackbot.help_respond(params, username: "swimmy")
   end
 end
-
-
