@@ -31,7 +31,9 @@ post '/slack' do
   elsif (params[:text] =~ /.*での.*から.*までの道/) then
     # FBot
     slackbot.distance_respond(params, username: "swimmy")
-
+    # SYBot
+  elsif (params[:text] =~ /get issue/ || params[:text] =~ /make issue/) then
+    slackbot.issue_respond(params, username: "SYBot")
     # elsif
     # elsif
     # elsif
