@@ -1,4 +1,11 @@
 # coding: utf-8
+
+
+# Yutaro Takaie / nomlab
+# This is a part of https://github.com/nomlab/swimmy
+
+
+
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'sinatra'
