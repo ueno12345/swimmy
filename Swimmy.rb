@@ -9,7 +9,7 @@ class Swimmy < SlackBot
   include FBot
   def help_respond(params, options = {})
     # Add help comments
-    text = "「〇〇」と言って or (移動手段)での(出発地点)から(到着地点)までの道"
+    text = "「〇〇」と言って or (移動手段)での(出発地点)から(到着地点)までの道 or get issue or make issue (t:title)[b:body]"
     return {text: text}.merge(options).to_json
   end
 end
@@ -31,14 +31,14 @@ post '/slack' do
   elsif (params[:text] =~ /.*での.*から.*までの道/) then
     # FBot
     slackbot.distance_respond(params, username: "swimmy")
+    # SYBot
+  elsif (params[:text] =~ /get issue/ || params[:text] =~ /make issue/) then
+    slackbot.issue_respond(params, username: "SYBot")
+    # elsif
+    # elsif
+    # elsif
 
-    # elsif
-    # elsif
-    # elsif
-  
   else
     slackbot.help_respond(params, username: "swimmy")
   end
 end
-
-
