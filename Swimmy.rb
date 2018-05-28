@@ -13,6 +13,13 @@ class Swimmy < SlackBot
   include Amebot
   include TakaBot
   include SYBot
+
+  def say_respond(params, options = {})
+    text = params[:text].match(/「(.*)」と言って/)
+
+    return {text: text[1]}.merge(options).to_json
+  end
+
   def help_respond(params, options = {})
     # Add help comments
 
