@@ -18,12 +18,6 @@ BASE_URL_GEOCODE = "https://maps.google.com/maps/api/geocode/json"
 BASE_URL_DIRECTIONS = "https://maps.googleapis.com/maps/api/directions/json"
 
 module FBot
-  def say_respond(params, options = {})
-    text = params[:text].match(/「(.*)」と言って/)
-
-    return {text: text[1]}.merge(options).to_json
-  end
-
   def address_to_geocode(address)
     address = URI.encode(address)
     hash = Hash.new
@@ -49,7 +43,7 @@ module FBot
   end
 
   def distribute_transport(params)
-    test = params[:text].match(/@FBot (.*)での.*から.*までの道/)
+    test = params[:text].match(/ (.*)での.*から.*までの道/)
     if (test[1] == "徒歩") then
       return "walking"
     elsif (test[1] == "自動車") then
@@ -91,11 +85,9 @@ module FBot
   end
 
   def distance_respond(params, options = {})
-    test = params[:text].match(/@FBot .*での(.*)から(.*)までの道/)
-    p test[1]
-    p test[2]
-    start = address_to_geocode(test[1])
-    goal  = address_to_geocode(test[2])
+    address = params[:text].match(/ .*での(.*)から(.*)までの道/)
+    start = address_to_geocode(address[1])
+    goal  = address_to_geocode(address[2])
     if (start == nil || goal == nil)
       return {text: "測定できませんでした"}.merge(options).to_json
     end
