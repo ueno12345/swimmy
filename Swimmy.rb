@@ -5,10 +5,12 @@ require 'sinatra'
 require 'SlackBot'
 require 'FBot'
 require 'Amebot'
+require 'TakaBot'
 
 class Swimmy < SlackBot
   include FBot
   include Amebot
+  include TakaBot
   def help_respond(params, options = {})
     # Add help comments
 
@@ -16,7 +18,8 @@ class Swimmy < SlackBot
 ・「〇〇」と言って\n
 ・(移動手段)での(出発地点)から(到着地点)までの道\n
 ・〇〇の雨の状況\n
-・get issue or make issue (t:title)[b:body]\n"
+・get issue or make issue (t:title)[b:body]\n
+・「飲食店の名前 地名/都市名/駅名など」の情報\n"
 
     return {text: text}.merge(options).to_json
   end
@@ -49,7 +52,9 @@ post '/slack' do
   elsif (params[:text] =~ /get issue/ || params[:text] =~ /make issue/) then
     slackbot.issue_respond(params, username: "SYBot")
 
-    # elsif
+    # TakaBot
+  elsif (params[:text] =~ /の情報/) then
+    slackbot.show_place_detail(params, username: "swimmy")
     # elsif
     # elsif
 
