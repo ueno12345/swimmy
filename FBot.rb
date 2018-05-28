@@ -43,12 +43,12 @@ module FBot
   end
 
   def distribute_transport(params)
-    test = params[:text].match(/ (.*)での.*から.*までの道/)
-    if (test[1] == "徒歩") then
+    transport = params[:text].match(/ (.*)での.*から.*までの道/)
+    if (transport[1] == "徒歩") then
       return "walking"
-    elsif (test[1] == "自動車") then
+    elsif (transport[1] == "自動車") then
       return "driving"
-    elsif (test[1] == "電車")
+    elsif (transport[1] == "電車")
       return "transit"
     else
       return "NotTransport"
