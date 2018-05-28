@@ -10,7 +10,7 @@ require 'uri'
 require 'yaml'
 require 'net/https'
 
- GITHUB_API = ENV['GITHUB_API'] 
+ GITHUB_API = https://api.github.com/repos/nomlab/nompedia/issues 
  USERNAME = ENV['GIT_USERNAME']
  PASSWORD = ENV['GIT_PASSWORD']
 
