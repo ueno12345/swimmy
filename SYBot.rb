@@ -11,8 +11,8 @@ require 'yaml'
 require 'net/https'
 
  GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
- USERNAME = config["USAERNAME"]
- PASSWORD = config["PASSWORD"]
+ USERNAME = @config["USAERNAME"]
+ PASSWORD = @config["PASSWORD"]
 
   module SYBot
 
