@@ -6,11 +6,13 @@ require 'SlackBot'
 require 'FBot'
 require 'Amebot'
 require 'TakaBot'
+require 'SYBot'
 
 class Swimmy < SlackBot
   include FBot
   include Amebot
   include TakaBot
+  include SYBot
   def help_respond(params, options = {})
     # Add help comments
 
@@ -50,7 +52,7 @@ post '/slack' do
 
    # SYBot
   elsif (params[:text] =~ /get issue/ || params[:text] =~ /make issue/) then
-    slackbot.issue_respond(params, username: "SYBot")
+    slackbot.issue_respond(params, username: "swimmy")
 
     # TakaBot
   elsif (params[:text] =~ /の情報/) then

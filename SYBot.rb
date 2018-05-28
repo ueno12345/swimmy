@@ -10,6 +10,10 @@ require 'uri'
 require 'yaml'
 require 'net/https'
 
+ GITHUB_API = ENV['GITHUB_API'] 
+ USERNAME = ENV['GIT_USERNAME']
+ PASSWORD = ENV['GIT_PASSWORD']
+
   module SYBot
 
   def issue_respond(params,options = {})
