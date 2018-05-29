@@ -11,8 +11,6 @@ require 'yaml'
 require 'net/https'
 
  GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
- USERNAME = @config["USAERNAME"]
- PASSWORD = @config["PASSWORD"]
 
   module SYBot
 
@@ -44,7 +42,7 @@ require 'net/https'
       end
 
     when "c" then
-      new_issue = {:title => "default",:body => "default",:assignee => USERNAME}
+      new_issue = {:title => "default",:body => "default",:assignee => @config["USERNAME"]}
       if (i1 = text.index("t:",crud[1] + "make issue".size)) != nil then
         if (i2 = text.index("b:",i1+2)) != nil then
           new_issue["title"] = text[i1+2...i2-1]
@@ -84,7 +82,7 @@ require 'net/https'
   def get_issues
     uri = URI.parse(GITHUB_API)
     request = Net::HTTP::Get.new(uri)
-    request.basic_auth(USERNAME, PASSWORD)
+    request.basic_auth(@config["USERNAME"], @config["PASSWORD"])
     req_options = {use_ssl: uri.scheme == "https"}
     response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
       http.request(request)
@@ -95,7 +93,7 @@ require 'net/https'
   def make_issue(issue)
     uri = URI.parse(GITHUB_API)
     request = Net::HTTP::Post.new(uri)
-    request.basic_auth(USERNAME, PASSWORD)
+    request.basic_auth(@config["USERNAME"], @config["PASSWORD"])
     request.body = issue.to_json
     req_options = {use_ssl: uri.scheme == "https"}
     response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
