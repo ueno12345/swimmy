@@ -7,6 +7,11 @@ require 'net/https'
 class SlackBot
   def initialize(settings_file_path = "settings.yml")
     @config = YAML.load_file(settings_file_path) if File.exist?(settings_file_path)
+
+    # This code assumes to set incoming webhook url as evironment variable in Heroku
+    # SlackBot uses settings.yml as config when it serves on local
+
+    @google_maps_api = ENV['GOOGLE_MAPS_API_KEY'] || @config["google_maps_api_key"]
   end
 
   def naive_respond(params, options = {})
