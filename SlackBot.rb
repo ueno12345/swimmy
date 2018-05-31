@@ -12,8 +12,9 @@ class SlackBot
     # SlackBot uses settings.yml as config when it serves on local
 
     @google_maps_api = ENV['GOOGLE_MAPS_API_KEY'] || @config["google_maps_api_key"]
-  end
-
+    @git_username = ENV['GIT_USERNAME'] || @config["git_username"]
+    @git_password = ENV['GIT_PASSWORD'] || @config["git_password"]
+    end 
   def naive_respond(params, options = {})
     return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
 
