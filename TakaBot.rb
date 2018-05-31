@@ -26,7 +26,7 @@ module TakaBot
     uri.query = URI.encode_www_form({
                                       language: "ja",
                                       query: keyword,
-                                      key: @config["google_places_apikey"]
+                                      key: @google_places_api_key
                                     })
     p uri.query
     p uri
@@ -63,7 +63,7 @@ module TakaBot
     uri.query = URI.encode_www_form({
                                       language: "ja",
                                       place_id: place_id,
-                                      key: @config["google_places_apikey"]
+                                      key: @google_places_api_key
                                     })
     p uri
     Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
@@ -78,7 +78,7 @@ module TakaBot
     uri = URI(BASE_URL_PHOTO)
     res = nil
     uri.query = URI.encode_www_form({
-                                      key: @config["google_places_apikey"],
+                                      key: @google_places_api_key,
                                       photoreference: photo_ref,
                                       maxwidth: 400
                                     })
