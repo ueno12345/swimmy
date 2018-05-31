@@ -14,7 +14,7 @@ class SlackBot
     @google_maps_api = ENV['GOOGLE_MAPS_API_KEY'] || @config["google_maps_api_key"]
     @git_username = ENV['GIT_USERNAME'] || @config["git_username"]
     @git_password = ENV['GIT_PASSWORD'] || @config["git_password"]
-end 
+    end 
   def naive_respond(params, options = {})
     return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
 
