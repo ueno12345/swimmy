@@ -22,7 +22,7 @@ module FBot
     address = URI.encode(address)
     hash = Hash.new
  
-    reqUrl = "#{BASE_URL_GEOCODE}?address=#{address}&sensor=false&language=ja&key=" + @config["google_maps_api_key"]
+    reqUrl = "#{BASE_URL_GEOCODE}?address=#{address}&sensor=false&language=ja&key=" + @google_maps_api
 
     response = Net::HTTP.get_response(URI.parse(reqUrl))
 
@@ -64,7 +64,7 @@ module FBot
     hash = Hash.new
     hash['distance'] = 0
     hash['duration'] = 0
-    reqUrl = "#{BASE_URL_DIRECTIONS}?origin=#{start['lat']},#{start['lng']}&destination=#{goal['lat']},#{goal['lng']}&language=ja&mode=#{mode}&key=" + @config["google_maps_api_key"]
+    reqUrl = "#{BASE_URL_DIRECTIONS}?origin=#{start['lat']},#{start['lng']}&destination=#{goal['lat']},#{goal['lng']}&language=ja&mode=#{mode}&key=" + @google_maps_api
 
     response = Net::HTTP.get_response(URI.parse(reqUrl))
 
