@@ -52,7 +52,7 @@ module Amebot
 
     p place
     client_id = "appid="
-    rain_uri = base_uri + output + "&" + "coordinates=" + place + "&" + client_id + @config["yahoo_developer_network_api_key"]
+    rain_uri = base_uri + output + "&" + "coordinates=" + place + "&" + client_id + @yahoo_api
 
     p rain_uri
     
