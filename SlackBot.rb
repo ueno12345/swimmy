@@ -15,7 +15,8 @@ class SlackBot
     @git_password = ENV['GIT_PASSWORD'] || @config["git_password"]
     @google_places_api_key = ENV['GOOGLE_PLACES_API_KEY'] || @config["google_places_api_key"]
     @yahoo_api = ENV['YAHOO_API_KEY'] || @config["yahoo_api_key"]
-    end
+    @slack_incoming_webhook = ENV['slack_incoming_webhook'] || @config["slack_incoming_webhook"]
+  end
   def naive_respond(params, options = {})
     return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
 

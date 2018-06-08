@@ -71,3 +71,9 @@ post '/slack' do
     slackbot.help_respond(params, username: "swimmy")
   end
 end
+
+post '/webhook/git/issue' do
+    #SYBot
+    content_type :json
+    slackbot.git_webhook_respond(params, username: "swimmy")
+end

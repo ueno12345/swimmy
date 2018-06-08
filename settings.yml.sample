@@ -3,3 +3,4 @@ google_places_api_key: XXXX
 yahoo_api_key: XXXX
 git_username: XXXX
 git_password: XXXX
+slack_incoming_webhook: XXXX
