@@ -34,13 +34,12 @@ require 'net/https'
         end
         repository_url = issue_list[0]["repository_url"].gsub(/api.github.com\/repos/,"github.com")
         issues_url = repository_url << "\/issues"
-        text_hedder = "issues\nLink" << issues_url
+        text_hedder = "\<" << issues_url << "\|\*issues\*\>\n"
         titles = text_hedder << "\n"
 
-        issue_list.each do |issue|
-          titles << ("Title: " << issue["title"] )
-          titles << "\n"
-          titles << ("Link: " << issue["html_url"])
+        issue_list.each do |issue|     
+          titles << ("\*Title: \*\<" << issue["html_url"])
+          titles << ("\|" << issue["title"] << ">")
           titles << "\n"
         end 
         ret =  {text: titles}.merge(options).to_json
