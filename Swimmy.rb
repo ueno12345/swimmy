@@ -15,6 +15,7 @@ class Swimmy < SlackBot
   include SYBot
 
   def say_respond(params, options = {})
+    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
     text = params[:text].match(/「(.*)」と言って/)
 
     return {text: text[1]}.merge(options).to_json
