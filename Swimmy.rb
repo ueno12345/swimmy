@@ -24,11 +24,11 @@ class Swimmy < SlackBot
     # Add help comments
 
     text = "
-・「〇〇」と言って\n
-・(移動手段)での(出発地点)から(到着地点)までの道\n
-・〇〇の雨の状況\n
-・get issue or make issue (t:title)[b:body]\n
-・「飲食店の名前 地名/都市名/駅名など」の情報\n"
+・「〇〇」と言って
+・(移動手段)での(出発地点)から(到着地点)までの道
+・〇〇の雨の状況
+・get issue or make issue (t:title)[b:body]
+・「飲食店の名前 地名/都市名/駅名など」の情報"
 
     return {text: text}.merge(options).to_json
   end
@@ -53,19 +53,17 @@ post '/slack' do
   elsif (params[:text] =~ /.*での.*から.*までの道/) then
     slackbot.distance_respond(params, username: "swimmy")
 
-   # Amebot
+  # Amebot
   elsif (params[:text] =~ /雨の状況/) then
     slackbot.rain_info(params,username: "swimmy")
 
-   # SYBot
+  # SYBot
   elsif (params[:text] =~ /get issue/ || params[:text] =~ /make issue/) then
     slackbot.issue_respond(params, username: "swimmy")
 
-    # TakaBot
+  # TakaBot
   elsif (params[:text] =~ /の情報/) then
     slackbot.show_place_detail(params, username: "swimmy")
-    # elsif
-    # elsif
 
   else
     slackbot.help_respond(params, username: "swimmy")
