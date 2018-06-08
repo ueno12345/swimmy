@@ -85,6 +85,7 @@ module FBot
   end
 
   def distance_respond(params, options = {})
+    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
     address = params[:text].match(/ .*での(.*)から(.*)までの道/)
     start = address_to_geocode(address[1])
     goal  = address_to_geocode(address[2])
