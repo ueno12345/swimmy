@@ -43,7 +43,7 @@ require 'net/https'
           titles << ("Link: " << issue["html_url"])
           titles << "\n"
         end 
-        ret =  {text: (text_hedder << titles)}.merge(options).to_json
+        ret =  {text: titles}.merge(options).to_json
       end
 
     when "c" then
