@@ -10,8 +10,8 @@ require 'uri'
 require 'yaml'
 require 'net/https'
 
- #GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
- GITHUB_API = "https://api.github.com/repos/yoshida-shu/SYBot/issues"
+ GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
+ #GITHUB_API = "https://api.github.com/repos/yoshida-shu/SYBot/issues"##for test
 
   module SYBot
 
