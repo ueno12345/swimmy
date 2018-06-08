@@ -32,13 +32,18 @@ require 'net/https'
           ret = {text: "API error"}.merge(options).to_json
           return ret
         end
-        titles = "issues\n"
+        repository_url = issue_list[0]["repository_url"].gsub(/api.github.com\/repos/,"github.com")
+        issues_url = repository_url << "\/issues"
+        text_hedder = "issues\nLink" << issues_url
+        titles = text_hedder << "\n"
 
         issue_list.each do |issue|
-          titles << ("title: " << issue["title"] )
+          titles << ("Title: " << issue["title"] )
           titles << "\n"
-        end
-        ret =  {text: titles}.merge(options).to_json
+          titles << ("Link: " << issue["html_url"])
+          titles << "\n"
+        end 
+        ret =  {text: (text_hedder << titles)}.merge(options).to_json
       end
 
     when "c" then
