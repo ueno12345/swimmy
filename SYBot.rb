@@ -35,7 +35,9 @@ require 'net/https'
         titles = "issues\n"
 
         issue_list.each do |issue|
-          titles << ("title: " << issue["title"] )
+          titles << ("Title: " << issue["title"] )
+          titles << "\n"
+          titles << ("Link: " << issue["url"])
           titles << "\n"
         end
         ret =  {text: titles}.merge(options).to_json
