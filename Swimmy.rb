@@ -22,14 +22,16 @@ class Swimmy < SlackBot
   end
 
   def help_respond(params, options = {})
-    # Add help comments
+    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
 
+    # Add help comments
     text = "
 ・「〇〇」と言って
 ・(移動手段)での(出発地点)から(到着地点)までの道
 ・〇〇の雨の状況
 ・get issue or make issue (t:title)[b:body]
-・「飲食店の名前 地名/都市名/駅名など」の情報"
+・「飲食店の名前 地名/都市名/駅名など」の情報
+    "
 
     return {text: text}.merge(options).to_json
   end
