@@ -2,7 +2,7 @@
 require 'json'
 require 'uri'
 require 'yaml'
-require 'net/https'
+require 'net/https' 
 
 class SlackBot
   def initialize(settings_file_path = "settings.yml")

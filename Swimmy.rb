@@ -6,7 +6,7 @@ require 'SlackBot'
 require 'FBot'
 require 'Amebot'
 require 'TakaBot'
-require 'SYBot'
+require 'SYBot' 
 
 class Swimmy < SlackBot
   include FBot
