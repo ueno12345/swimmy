@@ -21,7 +21,6 @@ class Swimmy < SlackBot
   end
 
   def help_respond(params, options = {})
-
     # Add help comments
     text = "
 ・「〇〇」と言って
@@ -45,7 +44,8 @@ end
 
 post '/slack' do
   content_type :json
-    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
+
+  return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
 
   # Add match patarn
   if (params[:text] =~ /「.*」と言って/) then
@@ -73,7 +73,7 @@ post '/slack' do
 end
 
 post '/webhook/git/issue' do
-    #SYBot
-    content_type :json
-    slackbot.git_webhook_respond(params, username: "swimmy")
+  #SYBot
+  content_type :json
+  slackbot.git_webhook_respond(params, username: "swimmy")
 end
