@@ -15,14 +15,12 @@ class Swimmy < SlackBot
   include SYBot
 
   def say_respond(params, options = {})
-    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
     text = params[:text].match(/「(.*)」と言って/)
 
     return {text: text[1]}.merge(options).to_json
   end
 
   def help_respond(params, options = {})
-    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
 
     # Add help comments
     text = "
@@ -47,6 +45,7 @@ end
 
 post '/slack' do
   content_type :json
+    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
 
   # Add match patarn
   if (params[:text] =~ /「.*」と言って/) then
