@@ -134,6 +134,7 @@ module TakaBot
 
   # show detail info about certain place
   def show_place_detail(params, options = {})
+    return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
     query_str = params[:text]
     query_str = query_str.match(/「(.*)」の情報/)
     query_str = query_str[1]
