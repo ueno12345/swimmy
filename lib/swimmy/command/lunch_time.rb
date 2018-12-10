@@ -2,11 +2,9 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'dotenv'
 Dotenv.load
 
-require 'yaml'
 require 'slack-ruby-client'
 
-config = YAML.load_file("settings.yml") if File.exist?("settings.yml")
-post_channel = ENV['POST_CHANNEL'] || config["post_channel"]
+post_channel = ENV['POST_CHANNEL']
 
 Slack.configure do |conf|
   conf.token = ENV["SLACK_API_TOKEN"]
@@ -19,7 +17,7 @@ Thread.new do
     loop do
       t = Time.new
       unless t.sunday? || t.saturday?
-        if t.hour == 11 && t.min == 30
+        if t.hour == 12 && t.min == 54
           client.message channel: post_channel, text: 'そろそろ，お昼ご飯の時間ですよ!!'
         end
       end

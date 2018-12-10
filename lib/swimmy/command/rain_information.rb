@@ -15,11 +15,18 @@ require 'singleton'
 require 'kconv'
 require 'slack-ruby-bot'
 
-module Slack_swimmy
-  module Commands
-    class FBot < SlackRubyBot::Commands::Base
-      @config = YAML.load_file("settings.yml") if File.exist?("settings.yml")
-      @yahoo_api = ENV['YAHOO_API_KEY'] || @config["yahoo_api_key"]
+module Swimmy
+  module Command
+    class Rain_information < SlackRubyBot::Commands::Base
+      match(/雨の状況/) do |client, data, match|
+        json = {:user_name => data.user, :text => data.text}.to_json
+        params = JSON.parse(json, symbolize_names: true)
+        res = rain_info(params)
+        text = JSON.parse(res)
+        client.say(channel: data.channel, text: text["text"])
+      end
+
+      @yahoo_api = ENV['YAHOO_API_KEY']
 
       def self.get_locate(params)
         place_info = params[:text].sub(/の雨の状況.*/,'').sub(/.* /,'').sub(/\n/,'')
@@ -97,14 +104,6 @@ module Slack_swimmy
         else
           return "error"
         end
-      end
-
-      match(/雨の状況/) do |client, data, match|
-        json = {:user_name => data.user, :text => data.text}.to_json
-        params = JSON.parse(json, symbolize_names: true)
-        res = rain_info(params)
-        text = JSON.parse(res)
-        client.say(channel: data.channel, text: text["text"])
       end
     end
   end

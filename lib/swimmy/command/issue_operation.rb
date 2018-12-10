@@ -7,18 +7,24 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'json'
 require 'uri'
-require 'yaml'
 require 'net/https'
 require 'slack-ruby-bot'
 
 GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
 
-module Slack_swimmy
-  module Commands
-    class FBot < SlackRubyBot::Commands::Base
-      @config = YAML.load_file("settings.yml") if File.exist?("settings.yml")
-      @git_username = ENV['GIT_USERNAME'] || @config["git_username"]
-      @git_password = ENV['GIT_PASSWORD'] || @config["git_password"]
+module Swimmy
+  module Command
+    class Issue_operation < SlackRubyBot::Commands::Base
+      match(/(get|make) issue/) do |client, data, match|
+        json = {:user_name => data.user, :text => data.text}.to_json
+        params = JSON.parse(json, symbolize_names: true)
+        res = issue_respond(params)
+        text = JSON.parse(res)
+        client.say(channel: data.channel, text: text["text"])
+      end
+
+      @git_username = ENV['GIT_USERNAME']
+      @git_password = ENV['GIT_PASSWORD']
 
       def self.issue_respond(params,options = {})
         return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
@@ -65,7 +71,6 @@ module Slack_swimmy
               if err == nil
                 ret = {:text => "created"}.merge(options).to_json
               else
-                p "hay!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                 ret = {:text => ("creation faild:" + err)}.merge(options).to_json
               end
             end
@@ -119,51 +124,49 @@ module Slack_swimmy
         return titles
       end
 
-      def self.git_webhook_respond(params,options = {})
-        if params["action"] == nil then
+      def self.git_webhook_respond(payloads,options = {})
+        params = JSON.parse(payloads[:payload])
+        if (params == nil || params == {})then
           ret = {:text => "Faild to get action"}.merge(options).to_json
         else
-          #params は IndifferentHash で，最も上の階層のvalueの型がStringであるため，eval で Hash に直しています．
-          issue_h =  eval(params[:issue])
-          repo_h = eval(params[:repository])
           act = params["action"]
-          repository_name = repo_h["name"] || "None"
-          repository_url = repo_h["html_url"] || "None"
-          issue_title = issue_h["title"] || "None"
-          issue_url = issue_h["html_url"] || "None"
+          repository_name = params["repository"]["name"] || "None"
+          repository_url = params["repository"]["html_url"] || "None"
+          issue_title = params["issue"]["title"] || "None"
+          issue_url = params["issue"]["html_url"] || "None"
           issues_url = repository_url << "\/issues" || "None"
-          user_name = issue_h["user"]["login"] || "None"
-          assignee = issue_h["user"]["assignee"] || "None"
-
+          user_name = params["issue"]["user"]["login"] || "None"
+          assignee = params["issue"]["assignee"] || "None"
+    
           text_hedder = "\<" << issues_url << "\|\*issues\*\>\n"
           ret_txt = text_hedder << "\n"
-
+    
           case act
           when "opened" then
-            ret_txt = make_link(repository_url,repository_name) << "\:" 
-            ret_txt << user_name << "によって， \*issue\*\: " 
+            ret_txt = make_link(repository_url,repository_name) << "\:"
+            ret_txt << user_name << "によって， \*issue\*\: "
             ret_txt << make_link(issue_url,issue_title) << "が作成されました．"
           when "reopened" then
-            ret_txt = make_link(repository_url,repository_name) << "\:" 
-            ret_txt << user_name << "によって， \*issue\*\:" 
+            ret_txt = make_link(repository_url,repository_name) << "\:"
+            ret_txt << user_name << "によって， \*issue\*\:"
             ret_txt << make_link(issue_url,issue_title) << "が再び開かれました．"
           when "closed" then
-            ret_txt = make_link(repository_url,repository_name) << "\:" 
-            ret_txt << user_name << "によって， \*issue\*\:" 
+            ret_txt = make_link(repository_url,repository_name) << "\:"
+            ret_txt << user_name << "によって， \*issue\*\:"
             ret_txt << make_link(issue_url,issue_title) << "が閉鎖されました．"
           when "assigned" then
-            ret_txt = make_link(repository_url,repository_name) << "\:" 
-            ret_txt << user_name << "によって，" 
+            ret_txt = make_link(repository_url,repository_name) << "\:"
+            ret_txt << user_name << "によって，"
             ret_txt << user_name << "に \*issue\*\:"
             ret_txt << make_link(issue_url,issue_title) << "が割り当てられました．"
           when "unassigned" then
-            ret_txt = make_link(repository_url,repository_name) << "\:" 
-            ret_txt << user_name << "によって，" 
+            ret_txt = make_link(repository_url,repository_name) << "\:"
+            ret_txt << user_name << "によって，"
             ret_txt << user_name << "が \*issue\*\:"
             ret_txt << make_link(issue_url,issue_title) << "の担当から外されました．"
           when "edited" then
-            ret_txt = make_link(repository_url,repository_name) << "\:" 
-            ret_txt << user_name << "によって， \*issue\*\:" 
+            ret_txt = make_link(repository_url,repository_name) << "\:"
+            ret_txt << user_name << "によって， \*issue\*\:"
             ret_txt << make_link(issue_url,issue_title) << "が編集されました．"
           else
             ret_txt = nil
@@ -173,7 +176,7 @@ module Slack_swimmy
         https_post(@slack_incoming_webhook,ret)
         return ret
       end
-
+    
       def self.https_post(url,json_data)
         uri = URI.parse(url)
         request = Net::HTTP::Post.new(uri)
@@ -182,15 +185,7 @@ module Slack_swimmy
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
           http.request(request)
         end
-      end
-
-      match(/(get|make) issue/) do |client, data, match|
-        json = {:user_name => data.user, :text => data.text}.to_json
-        params = JSON.parse(json, symbolize_names: true)
-        res = issue_respond(params)
-        text = JSON.parse(res)
-        client.say(channel: data.channel, text: text["text"])
-      end
+      end 
     end
   end
 end

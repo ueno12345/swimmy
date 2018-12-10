@@ -7,7 +7,6 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'json'
 require 'uri'
-require 'yaml'
 require 'net/https'
 require 'slack-ruby-bot'
 
@@ -15,11 +14,18 @@ BASE_URL_TEXTSEARCH = "https://maps.googleapis.com/maps/api/place/textsearch/jso
 BASE_URL_DETAILS = "https://maps.googleapis.com/maps/api/place/details/json?"
 BASE_URL_PHOTO = "https://maps.googleapis.com/maps/api/place/photo?"
 
-module Slack_swimmy
-  module Commands
-    class TakaBot < SlackRubyBot::Commands::Base
-      @config = YAML.load_file("settings.yml") if File.exist?("settings.yml")
-      @google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] || @config["google_maps_api_key"]
+module Swimmy
+  module Command
+    class Restaurant_information < SlackRubyBot::Commands::Base
+      match(/の情報/) do |client, data, match|
+        json = {:user_name => data.user, :text => data.text}.to_json
+        p params = JSON.parse(json, symbolize_names: true)
+        res = show_place_detail(params)
+        text = JSON.parse(res)
+        client.say(channel: data.channel, text: text["text"])
+      end
+
+      @google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
 
       # get place info by text search
       def self.get_place_info(keyword)
@@ -159,14 +165,6 @@ module Slack_swimmy
         res_text = "#{user_name} \n【 *#{res["name"]}* 】 #{res["open_status"]} \n*価格帯*:moneybag:: #{res["price_level"]}　*評価*:star:: #{res["rating"]}/5　*URL*:computer:: #{res["website"]} \n*レビュー*:information_desk_person:: \n#{res["latest_review"]} \n#{photo}"
 
         return {text: res_text}.merge(options).to_json
-      end
-
-      match(/の情報/) do |client, data, match|
-        json = {:user_name => data.user, :text => data.text}.to_json
-        p params = JSON.parse(json, symbolize_names: true)
-        res = show_place_detail(params)
-        text = JSON.parse(res)
-        client.say(channel: data.channel, text: text["text"])
       end
     end
   end

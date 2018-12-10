@@ -7,18 +7,24 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 require 'json'
 require 'uri'
-require 'yaml'
 require 'net/https'
 require 'slack-ruby-bot'
 
 BASE_URL_GEOCODE = "https://maps.google.com/maps/api/geocode/json"
 BASE_URL_DIRECTIONS = "https://maps.googleapis.com/maps/api/directions/json"
 
-module Slack_swimmy
-  module Commands
-    class FBot < SlackRubyBot::Commands::Base
-      @config = YAML.load_file("settings.yml") if File.exist?("settings.yml")
-      @google_maps_api = ENV['GOOGLE_MAPS_API_KEY'] || @config["google_maps_api_key"]
+module Swimmy
+  module Command
+    class Route < SlackRubyBot::Commands::Base
+      match(/.*での.*から.*までの道/) do |client, data, match|
+        json = {:user_name => data.user, :text => data.text}.to_json
+        params = JSON.parse(json, symbolize_names: true)
+        res = distance_respond(params)
+        text = JSON.parse(res)
+        client.say(channel: data.channel, text: text["text"])
+      end
+
+      @google_maps_api = ENV['GOOGLE_MAPS_API_KEY']
 
       def self.address_to_geocode(address)
         address = URI.encode(address)
@@ -89,8 +95,8 @@ module Slack_swimmy
       def self.distance_respond(params, options = {})
         return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
         address = params[:text].match(/.*での(.*)から(.*)までの道/)
-        start = address_to_geocode(address[1])
-        goal  = address_to_geocode(address[2])
+        p start = address_to_geocode(address[1])
+        p goal  = address_to_geocode(address[2])
         if (start == nil || goal == nil)
           return {text: "測定できませんでした"}.merge(options).to_json
         end
@@ -110,15 +116,6 @@ module Slack_swimmy
 
         return {text: text}.merge(options).to_json
       end
-
-      match(/.*での.*から.*までの道/) do |client, data, match|
-        json = {:user_name => data.user, :text => data.text}.to_json
-        params = JSON.parse(json, symbolize_names: true)
-        res = distance_respond(params)
-        text = JSON.parse(res)
-        client.say(channel: data.channel, text: text["text"])
-      end
-
     end
   end
 end
