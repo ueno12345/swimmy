@@ -9,26 +9,29 @@ require 'json'
 require 'uri'
 require 'net/https'
 require 'slack-ruby-bot'
+require 'base'
 
 GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
 
 module Swimmy
   module Command
-    class Issue_operation < SlackRubyBot::Commands::Base
+    class Issue_operation_match < Swimmy::Command::Base
       match(/(get|make) issue/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
-        res = issue_respond(params)
+        res = Issue_operation.new.issue_respond(params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
+    end
 
-      @git_username = ENV['GIT_USERNAME']
-      @git_password = ENV['GIT_PASSWORD']
-
-      def self.issue_respond(params,options = {})
+    class Issue_operation
+      def issue_respond(params,options = {})
         return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
         text=params[:text]
+
+        git_username = ENV['GIT_USERNAME']
+        git_password = ENV['GIT_PASSWORD']
         # text.slice!(0..6)
         crud = issue_com_dic(text)
 
@@ -58,7 +61,7 @@ module Swimmy
           end
 
         when "c" then
-          new_issue = {:title => "default",:body => "Not edited yet\(created by Swimmy\)",:assignee => @git_username}
+          new_issue = {:title => "default",:body => "Not edited yet\(created by Swimmy\)",:assignee => git_username}
           if (i1 = text.index("t:",crud[1] + "make issue".size)) != nil then
             if (i2 = text.index("b:",i1+2)) != nil then
               new_issue["title"] = text[i1+2...i2-1]
@@ -85,7 +88,8 @@ module Swimmy
         return ret
       end
 
-      def self.issue_com_dic(str)
+      private
+      def issue_com_dic(str)
         if (crud=str.match(/get issue/)) != nil
           return ["r",0]
         elsif (i = str.index("make issue")) != nil
@@ -95,10 +99,12 @@ module Swimmy
         end
       end
 
-      def self.get_issues
+      def get_issues
+        git_username = ENV['GIT_USERNAME']
+        git_password = ENV['GIT_PASSWORD'] 
         uri = URI.parse(GITHUB_API)
         request = Net::HTTP::Get.new(uri)
-        request.basic_auth(@git_username, @git_password)
+        request.basic_auth(git_username, git_password)
         req_options = {use_ssl: uri.scheme == "https"}
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
           http.request(request)
@@ -106,10 +112,12 @@ module Swimmy
         return JSON.parse(response.body)
       end
 
-      def self.make_issue(issue)
+      def make_issue(issue)
+        git_username = ENV['GIT_USERNAME']
+        git_password = ENV['GIT_PASSWORD'] 
         uri = URI.parse(GITHUB_API)
         request = Net::HTTP::Post.new(uri)
-        request.basic_auth(@git_username, @git_password)
+        request.basic_auth(git_username, git_password)
         request.body = issue.to_json
         req_options = {use_ssl: uri.scheme == "https"}
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
@@ -118,13 +126,13 @@ module Swimmy
         return JSON.parse(response.body)["message"]
       end
 
-      def self.make_link(url,label)
+      def make_link(url,label)
         titles = "\<"
         titles << url << "\|" << label << "\>"
         return titles
       end
 
-      def self.git_webhook_respond(payloads,options = {})
+      def git_webhook_respond(payloads,options = {})
         params = JSON.parse(payloads[:payload])
         if (params == nil || params == {})then
           ret = {:text => "Faild to get action"}.merge(options).to_json
@@ -177,7 +185,7 @@ module Swimmy
         return ret
       end
     
-      def self.https_post(url,json_data)
+      def https_post(url,json_data)
         uri = URI.parse(url)
         request = Net::HTTP::Post.new(uri)
         request.body = json_data
