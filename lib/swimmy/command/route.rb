@@ -9,28 +9,28 @@ require 'json'
 require 'uri'
 require 'net/https'
 require 'slack-ruby-bot'
+require 'base'
 
 BASE_URL_GEOCODE = "https://maps.google.com/maps/api/geocode/json"
 BASE_URL_DIRECTIONS = "https://maps.googleapis.com/maps/api/directions/json"
 
 module Swimmy
   module Command
-    class Route < SlackRubyBot::Commands::Base
+    class Route < Swimmy::Command::Base
       match(/.*での.*から.*までの道/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
-        res = distance_respond(params)
+        res = Route.new.send(:distance_respond, params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
 
-      @google_maps_api = ENV['GOOGLE_MAPS_API_KEY']
-
-      def self.address_to_geocode(address)
+      private
+      def address_to_geocode(address)
+        google_maps_api = ENV['GOOGLE_MAPS_API_KEY']
         address = URI.encode(address)
         hash = Hash.new
-
-        reqUrl = "#{BASE_URL_GEOCODE}?address=#{address}&sensor=false&language=ja&key=" + @google_maps_api
+        reqUrl = "#{BASE_URL_GEOCODE}?address=#{address}&sensor=false&language=ja&key=" + google_maps_api
 
         response = Net::HTTP.get_response(URI.parse(reqUrl))
 
@@ -50,7 +50,7 @@ module Swimmy
         return hash
       end
 
-      def self.distribute_transport(params)
+      def distribute_transport(params)
         transport = params[:text].match(/(.*)での.*から.*までの道/)
         if (transport[1] == "徒歩") then
           return "walking"
@@ -63,7 +63,8 @@ module Swimmy
         end
       end
 
-      def self.get_route_info(params, options = {}, start, goal)
+      def get_route_info(params, options = {}, start, goal)
+        google_maps_api = ENV['GOOGLE_MAPS_API_KEY']
         mode = distribute_transport(params)
         if (mode == nil)
           return nil
@@ -72,7 +73,7 @@ module Swimmy
         hash = Hash.new
         hash['distance'] = 0
         hash['duration'] = 0
-        reqUrl = "#{BASE_URL_DIRECTIONS}?origin=#{start['lat']},#{start['lng']}&destination=#{goal['lat']},#{goal['lng']}&language=ja&mode=#{mode}&key=" + @google_maps_api
+        reqUrl = "#{BASE_URL_DIRECTIONS}?origin=#{start['lat']},#{start['lng']}&destination=#{goal['lat']},#{goal['lng']}&language=ja&mode=#{mode}&key=" + google_maps_api
 
         response = Net::HTTP.get_response(URI.parse(reqUrl))
 
@@ -92,7 +93,7 @@ module Swimmy
         return hash
       end
 
-      def self.distance_respond(params, options = {})
+      def distance_respond(params, options = {})
         return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
         address = params[:text].match(/.*での(.*)から(.*)までの道/)
         p start = address_to_geocode(address[1])

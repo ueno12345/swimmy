@@ -14,21 +14,23 @@ require 'net/http'
 require 'singleton'
 require 'kconv'
 require 'slack-ruby-bot'
+require 'base'
 
 module Swimmy
   module Command
-    class Rain_information < SlackRubyBot::Commands::Base
+    class Rain_information < Swimmy::Command::Base
       match(/雨の状況/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
-        res = rain_info(params)
+        res = Rain_information.new.send(:rain_info, params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
 
-      @yahoo_api = ENV['YAHOO_API_KEY']
 
-      def self.get_locate(params)
+
+      private
+      def get_locate(params)
         place_info = params[:text].sub(/の雨の状況.*/,'').sub(/.* /,'').sub(/\n/,'')
 
         p place_info
@@ -45,22 +47,22 @@ module Swimmy
         return  lng + ',' + lat
       end
 
-
-      def self.rain_info(params,options = {})
+      def rain_info(params,options = {})
+        yahoo_api = ENV['YAHOO_API_KEY']
         text = ""
         base_uri = "https://map.yahooapis.jp/weather/V1/place?"
         output = "output=json"
 
         if (params[:text] !~ /の雨の状況/)
           place = "133.922223,34.687387"
-        elsif (place = self.get_locate(params)) == "error"
+        elsif (place = get_locate(params)) == "error"
           text = "not found\n"
           return {text: "#{text}"}.merge(options).to_json
         end
 
         p place
         client_id = "appid="
-        rain_uri = base_uri + output + "&" + "coordinates=" + place + "&" + client_id + @yahoo_api
+        rain_uri = base_uri + output + "&" + "coordinates=" + place + "&" + client_id + yahoo_api
 
         p rain_uri
 
@@ -86,7 +88,7 @@ module Swimmy
       end
 
 
-      def self.rain_power(info)
+      def rain_power(info)
         if info == 0 
           return "降っていない"
         elsif info < 10 

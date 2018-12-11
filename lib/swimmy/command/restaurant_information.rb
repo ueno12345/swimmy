@@ -9,6 +9,7 @@ require 'json'
 require 'uri'
 require 'net/https'
 require 'slack-ruby-bot'
+require 'base'
 
 BASE_URL_TEXTSEARCH = "https://maps.googleapis.com/maps/api/place/textsearch/json?"
 BASE_URL_DETAILS = "https://maps.googleapis.com/maps/api/place/details/json?"
@@ -16,25 +17,25 @@ BASE_URL_PHOTO = "https://maps.googleapis.com/maps/api/place/photo?"
 
 module Swimmy
   module Command
-    class Restaurant_information < SlackRubyBot::Commands::Base
+    class Restaurant_information < Swimmy::Command::Base
       match(/の情報/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         p params = JSON.parse(json, symbolize_names: true)
-        res = show_place_detail(params)
+        res = Restaurant_information.new.send(:show_place_detail, params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
 
-      @google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
-
+      private
       # get place info by text search
-      def self.get_place_info(keyword)
+      def get_place_info(keyword)
+        google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
         uri = URI(BASE_URL_TEXTSEARCH)
         res = nil
         uri.query = URI.encode_www_form({
           language: "ja",
           query: keyword,
-          key: @google_places_api_key
+          key: google_places_api_key
         })
         p uri.query
         p uri
@@ -46,7 +47,7 @@ module Swimmy
         return res
       end
 
-      def self.get_place_id(place_info)
+      def get_place_id(place_info)
         if place_info["status"] != "OK"
           return nil
         end
@@ -55,7 +56,7 @@ module Swimmy
         return place_id
       end
 
-      def self.get_photo_ref(place_info)
+      def get_photo_ref(place_info)
         if place_info["status"] != "OK"
           return nil
         end
@@ -65,13 +66,14 @@ module Swimmy
       end
 
       # get place detail by place id given by text search
-      def self.get_place_detail(place_id)
+      def get_place_detail(place_id)
+        google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
         uri = URI(BASE_URL_DETAILS)
         res = nil
         uri.query = URI.encode_www_form({
           language: "ja",
           place_id: place_id,
-          key: @google_places_api_key
+          key: google_places_api_key
         })
         p uri
         Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
@@ -82,11 +84,12 @@ module Swimmy
         return res
       end
 
-      def self.get_place_photo(photo_ref)
+      def get_place_photo(photo_ref)
+        google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
         uri = URI(BASE_URL_PHOTO)
         res = nil
         uri.query = URI.encode_www_form({
-          key: @google_places_api_key,
+          key: google_places_api_key,
           photoreference: photo_ref,
           maxwidth: 400
         })
@@ -100,7 +103,7 @@ module Swimmy
         return res
       end
 
-      def self.extract_data_from_json(place_detail)
+      def extract_data_from_json(place_detail)
         if place_detail["status"] != "OK"
           return nil
         end
@@ -134,14 +137,14 @@ module Swimmy
         return detail_info
       end
 
-      def self.extract_photo_url(html)
+      def extract_photo_url(html)
         a_tag = html.match(/<A HREF="(.*)">/)
         photo_url = a_tag[1]
         return photo_url
       end
 
       # show detail info about certain place
-      def self.show_place_detail(params, options = {})
+      def show_place_detail(params, options = {})
         query_str = params[:text]
         query_str = query_str.match(/「(.*)」の情報/)
         query_str = query_str[1]
