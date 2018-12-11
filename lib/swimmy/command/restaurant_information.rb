@@ -17,15 +17,17 @@ BASE_URL_PHOTO = "https://maps.googleapis.com/maps/api/place/photo?"
 
 module Swimmy
   module Command
-    class Restaurant_information < Swimmy::Command::Base
+    class Restaurant_information_match < Swimmy::Command::Base
       match(/の情報/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         p params = JSON.parse(json, symbolize_names: true)
-        res = Restaurant_information.new.send(:show_place_detail, params)
+        res = Restaurant_information.new.show_place_detail(params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
+    end
 
+    class Restaurant_information 
       private
       # get place info by text search
       def get_place_info(keyword)
@@ -143,6 +145,7 @@ module Swimmy
         return photo_url
       end
 
+      public
       # show detail info about certain place
       def show_place_detail(params, options = {})
         query_str = params[:text]

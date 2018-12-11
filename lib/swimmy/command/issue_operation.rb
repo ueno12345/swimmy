@@ -15,22 +15,23 @@ GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
 
 module Swimmy
   module Command
-    class Issue_operation < Swimmy::Command::Base
+    class Issue_operation_match < Swimmy::Command::Base
       match(/(get|make) issue/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
-        res = Issue_operation.new.send(:issue_respond, params)
+        res = Issue_operation.new.issue_respond(params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
+    end
 
-      private
+    class Issue_operation
       def issue_respond(params,options = {})
         return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
         text=params[:text]
 
         git_username = ENV['GIT_USERNAME']
-        git_password = ENV['GIT_PASSWORD'] 
+        git_password = ENV['GIT_PASSWORD']
         # text.slice!(0..6)
         crud = issue_com_dic(text)
 
@@ -87,6 +88,7 @@ module Swimmy
         return ret
       end
 
+      private
       def issue_com_dic(str)
         if (crud=str.match(/get issue/)) != nil
           return ["r",0]

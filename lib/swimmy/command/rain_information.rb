@@ -18,17 +18,17 @@ require 'base'
 
 module Swimmy
   module Command
-    class Rain_information < Swimmy::Command::Base
+    class Rain_information_match < Swimmy::Command::Base
       match(/雨の状況/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
-        res = Rain_information.new.send(:rain_info, params)
+        res = Rain_information.new.rain_info(params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
+    end
 
-
-
+    class Rain_information
       private
       def get_locate(params)
         place_info = params[:text].sub(/の雨の状況.*/,'').sub(/.* /,'').sub(/\n/,'')
@@ -47,6 +47,27 @@ module Swimmy
         return  lng + ',' + lat
       end
 
+      def rain_power(info)
+        if info == 0 
+          return "降っていない"
+        elsif info < 10 
+          return "雨"
+        elsif info < 20 
+          return "やや強い雨"
+        elsif info < 30 
+          return "強い雨"
+        elsif info < 50 
+          return "激しい雨"
+        elsif info < 80 
+          return "非常に激しい雨"
+        elsif info >= 80
+          return "猛烈な雨"
+        else
+          return "error"
+        end
+      end
+
+      public
       def rain_info(params,options = {})
         yahoo_api = ENV['YAHOO_API_KEY']
         text = ""
@@ -85,27 +106,6 @@ module Swimmy
         end
 
         return {text: "#{text}"}.merge(options).to_json
-      end
-
-
-      def rain_power(info)
-        if info == 0 
-          return "降っていない"
-        elsif info < 10 
-          return "雨"
-        elsif info < 20 
-          return "やや強い雨"
-        elsif info < 30 
-          return "強い雨"
-        elsif info < 50 
-          return "激しい雨"
-        elsif info < 80 
-          return "非常に激しい雨"
-        elsif info >= 80
-          return "猛烈な雨"
-        else
-          return "error"
-        end
       end
     end
   end

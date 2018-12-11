@@ -16,20 +16,23 @@ BASE_URL_DIRECTIONS = "https://maps.googleapis.com/maps/api/directions/json"
 
 module Swimmy
   module Command
-    class Route < Swimmy::Command::Base
+    class Route_match < Swimmy::Command::Base
       match(/.*での.*から.*までの道/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
-        res = Route.new.send(:distance_respond, params)
+        res = Route.new.distance_respond(params)
         text = JSON.parse(res)
         client.say(channel: data.channel, text: text["text"])
       end
+    end
 
+    class Route
       private
       def address_to_geocode(address)
         google_maps_api = ENV['GOOGLE_MAPS_API_KEY']
         address = URI.encode(address)
         hash = Hash.new
+
         reqUrl = "#{BASE_URL_GEOCODE}?address=#{address}&sensor=false&language=ja&key=" + google_maps_api
 
         response = Net::HTTP.get_response(URI.parse(reqUrl))
@@ -93,6 +96,7 @@ module Swimmy
         return hash
       end
 
+      public
       def distance_respond(params, options = {})
         return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
         address = params[:text].match(/.*での(.*)から(.*)までの道/)
@@ -120,4 +124,3 @@ module Swimmy
     end
   end
 end
-
