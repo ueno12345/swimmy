@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require 'slack-ruby-bot'
+require 'swimmy'
+require 'swimmy/app'
+require 'swimmy/web'
+require 'dotenv'
+Dotenv.load
+
+Thread.abort_on_exception = true
+
+Thread.new do
+  begin
+    Swimmy::App.instance.run
+  rescue Exception => e
+    STDERR.puts "ERROR: #{e}"
+    STDERR.puts e.backtrace
+    raise e
+  end
+end
+
+Swimmy::Web.run!

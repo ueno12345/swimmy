@@ -1,22 +1,105 @@
+PATH
+  remote: .
+  specs:
+    swimmy (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
-    mustermann (1.0.2)
-    rack (2.0.5)
-    rack-protection (2.0.2)
+    activesupport (5.2.2)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    celluloid (0.17.3)
+      celluloid-essentials
+      celluloid-extras
+      celluloid-fsm
+      celluloid-pool
+      celluloid-supervision
+      timers (>= 4.1.1)
+    celluloid-essentials (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-extras (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-fsm (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-io (0.17.3)
+      celluloid (>= 0.17.2)
+      nio4r (>= 1.1)
+      timers (>= 4.1.1)
+    celluloid-pool (0.20.5)
+      timers (>= 4.1.1)
+    celluloid-supervision (0.20.6)
+      timers (>= 4.1.1)
+    concurrent-ruby (1.1.3)
+    diff-lcs (1.3)
+    dotenv (2.5.0)
+    faraday (0.15.4)
+      multipart-post (>= 1.2, < 3)
+    faraday_middleware (0.12.2)
+      faraday (>= 0.7.4, < 1.0)
+    gli (2.18.0)
+    hashie (3.6.0)
+    i18n (1.1.1)
+      concurrent-ruby (~> 1.0)
+    minitest (5.11.3)
+    multipart-post (2.0.0)
+    mustermann (1.0.3)
+    nio4r (2.3.1)
+    rack (2.0.6)
+    rack-protection (2.0.4)
       rack
-    sinatra (2.0.2)
+    rake (10.5.0)
+    rspec (3.8.0)
+      rspec-core (~> 3.8.0)
+      rspec-expectations (~> 3.8.0)
+      rspec-mocks (~> 3.8.0)
+    rspec-core (3.8.0)
+      rspec-support (~> 3.8.0)
+    rspec-expectations (3.8.2)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.8.0)
+    rspec-mocks (3.8.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.8.0)
+    rspec-support (3.8.0)
+    sinatra (2.0.4)
       mustermann (~> 1.0)
       rack (~> 2.0)
-      rack-protection (= 2.0.2)
+      rack-protection (= 2.0.4)
       tilt (~> 2.0)
-    tilt (2.0.8)
+    slack-ruby-bot (0.11.2)
+      hashie
+      slack-ruby-client (>= 0.6.0)
+    slack-ruby-client (0.13.1)
+      activesupport
+      faraday (>= 0.9)
+      faraday_middleware
+      gli
+      hashie
+      websocket-driver
+    thread_safe (0.3.6)
+    tilt (2.0.9)
+    timers (4.2.0)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
+    websocket-driver (0.7.0)
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.3)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  sinatra (~> 2.0.2)
+  bundler (~> 1.16)
+  celluloid-io
+  dotenv
+  rake (~> 10.0)
+  rspec (~> 3.0)
+  sinatra
+  slack-ruby-bot
+  swimmy!
 
 BUNDLED WITH
    1.16.2

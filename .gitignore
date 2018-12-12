@@ -32,6 +32,6 @@ attic/
 ################
 ## Private settings
 
-settings.yml
+.env
 vendor/
 .bundle/
