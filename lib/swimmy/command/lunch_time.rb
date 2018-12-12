@@ -17,7 +17,7 @@ Thread.new do
     loop do
       t = Time.new
       unless t.sunday? || t.saturday?
-        if t.hour == 12 && t.min == 54
+        if t.hour == 11 && t.min == 30
           client.message channel: post_channel, text: 'そろそろ，お昼ご飯の時間ですよ!!'
         end
       end

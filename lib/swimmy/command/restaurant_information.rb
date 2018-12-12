@@ -27,11 +27,11 @@ module Swimmy
       end
     end
 
-    class Restaurant_information 
+    class Restaurant_information
       private
       # get place info by text search
       def get_place_info(keyword)
-        google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
+        google_places_api_key = ENV['GOOGLE_PLACES_API_KEY']
         uri = URI(BASE_URL_TEXTSEARCH)
         res = nil
         uri.query = URI.encode_www_form({
@@ -69,7 +69,7 @@ module Swimmy
 
       # get place detail by place id given by text search
       def get_place_detail(place_id)
-        google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
+        google_places_api_key = ENV['GOOGLE_PLACES_API_KEY']
         uri = URI(BASE_URL_DETAILS)
         res = nil
         uri.query = URI.encode_www_form({
@@ -87,7 +87,7 @@ module Swimmy
       end
 
       def get_place_photo(photo_ref)
-        google_places_api_key = ENV['GOOGLE_MAPS_API_KEY'] 
+        google_places_api_key = ENV['GOOGLE_PLACES_API_KEY']
         uri = URI(BASE_URL_PHOTO)
         res = nil
         uri.query = URI.encode_www_form({
@@ -167,7 +167,7 @@ module Swimmy
         photo = photo.body # html
         photo = extract_photo_url(photo)
 
-        user_name = params[:user_name] ? "@#{params[:user_name]}" : ""
+        user_name = params[:user_name] ? "<@#{params[:user_name]}>" : ""
         res_text = "#{user_name} \n【 *#{res["name"]}* 】 #{res["open_status"]} \n*価格帯*:moneybag:: #{res["price_level"]}　*評価*:star:: #{res["rating"]}/5　*URL*:computer:: #{res["website"]} \n*レビュー*:information_desk_person:: \n#{res["latest_review"]} \n#{photo}"
 
         return {text: res_text}.merge(options).to_json
