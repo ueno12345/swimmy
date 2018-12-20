@@ -7,6 +7,7 @@ module Swimmy
     require "#{dir}/rain_information"
     require "#{dir}/restaurant_information"
     require "#{dir}/route"
+    require "#{dir}/photo_upload"
   # require "#{dir}/hide_defalts"
   end
 end
