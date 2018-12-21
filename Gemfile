@@ -9,3 +9,4 @@ gem 'slack-ruby-bot'
 gem 'sinatra'
 gem 'dotenv'
 gem 'celluloid-io'
+gem 'google-api-client', "~> 0.8"
