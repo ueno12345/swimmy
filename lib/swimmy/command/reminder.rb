@@ -31,7 +31,7 @@ SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR
 
 module Swimmy
   module Command
-    class Reminder < Swimmy::Command::Base
+    class Reminder_match < Swimmy::Command::Base
       match(/reminder:/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         p params = JSON.parse(json, symbolize_names: true)
