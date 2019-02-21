@@ -77,6 +77,9 @@ module Swimmy
             },
             end: {
               date_time: "#{query_str[2]}T#{query_str[3]}:00+09:00"
+            },
+            reminders: {
+              use_default: true
             }
           })
           result = service.insert_event('2f3b9n4f8gs4cgricj79fdi9jg@group.calendar.google.com', event)
