@@ -9,4 +9,5 @@ gem 'slack-ruby-bot'
 gem 'sinatra'
 gem 'dotenv'
 gem 'celluloid-io'
+gem 'google-api-client', "~> 0.8"
 gem 'sheetq', :git => 'https://github.com/nomlab/sheetq.git'

@@ -11,5 +11,6 @@ module Swimmy
     require "#{dir}/qiita_trend"
     require "#{dir}/photo_upload"
     require "#{dir}/lottery"
+    require "#{dir}/reminder"
   end
 end
