@@ -1,24 +1,43 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+################################################################
+# rbenv support:
+# If this file is a symlink, and bound to a specific ruby
+# version via rbenv (indicated by RBENV_VERSION),
+# I want to resolve the symlink and re-exec
+# the original executable respecting the .ruby_version
+# which should indicate the right version.
+#
+if File.symlink?(__FILE__) and ENV["RBENV_VERSION"]
+  ENV["RBENV_VERSION"] = nil
+  shims_path = File.expand_path("shims", ENV["RBENV_ROOT"])
+  ENV["PATH"] = shims_path + ":" + ENV["PATH"]
+  exec(File.readlink(__FILE__), *ARGV)
+end
 
-require 'slack-ruby-bot'
+gemfile = File.expand_path("../../Gemfile", __FILE__)
+
+if File.exists?(gemfile + ".lock")
+  ENV["BUNDLE_GEMFILE"] = gemfile
+  require "bundler/setup"
+end
+
+require "rubygems"
 require 'swimmy'
-require 'swimmy/app'
-require 'swimmy/web'
 require 'dotenv'
 Dotenv.load
 
+Encoding.default_external="UTF-8"
 Thread.abort_on_exception = true
 
 Thread.new do
-  begin
-    Swimmy::App.instance.run
-  rescue Exception => e
-    STDERR.puts "ERROR: #{e}"
-    STDERR.puts e.backtrace
-    raise e
-  end
+  Swimmy::Web.run!
 end
 
-Swimmy::Web.run!
+begin
+  Swimmy::App.instance.run
+rescue Exception => e
+  STDERR.puts "ERROR: #{e}"
+  STDERR.puts e.backtrace
+  raise e
+end
