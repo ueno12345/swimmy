@@ -11,12 +11,14 @@ require 'net/https'
 require 'slack-ruby-bot'
 require 'base'
 
-GITHUB_API = "https://api.github.com/repos/nomlab/nompedia/issues"
+OWNER = "nomlab"
+REPO = "sandbox"
+ISSUE_URL = "https://api.github.com/repos/#{OWNER}/#{REPO}/issues"
 
 module Swimmy
   module Command
     class Issue_operation_match < Swimmy::Command::Base
-      match(/(get|make) issue/) do |client, data, match|
+      match(/(todo: list|todo:\s*t\s*:\s*"(.*?)"\s*(\s*b\s*:\s*"(.*?)")?)/) do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
         res = Issue_operation.new.issue_respond(params)
@@ -30,15 +32,12 @@ module Swimmy
         return nil if params[:user_name] == "slackbot" || params[:user_id] == "USLACKBOT"
         text=params[:text]
 
-        git_username = ENV['GIT_USERNAME']
-        git_password = ENV['GIT_PASSWORD']
-        # text.slice!(0..6)
         crud = issue_com_dic(text)
 
         case crud[0]
         when "r" then
           issue_list = get_issues
-          if issue_list==nil then
+          if issue_list == nil then
             ret = {text: "There aren't any open issues."}.merge(options).to_json
           else
             err = issue_list.inspect
@@ -49,7 +48,7 @@ module Swimmy
             end
             repository_url = issue_list[0]["repository_url"].gsub(/api.github.com\/repos/,"github.com")
             issues_url = repository_url << "\/issues"
-            text_hedder = "\<" << issues_url << "\|\*issues\*\>\n"
+            text_hedder = "\<" << issues_url << "\|\*Issues in #{OWNER}/#{REPO}\*\>\n"
             titles = text_hedder << "\n"
 
             issue_list.each do |issue|
@@ -61,38 +60,30 @@ module Swimmy
           end
 
         when "c" then
-          new_issue = {:title => "default",:body => "Not edited yet\(created by Swimmy\)",:assignee => git_username}
-          if (i1 = text.index("t:",crud[1] + "make issue".size)) != nil then
-            if (i2 = text.index("b:",i1+2)) != nil then
-              new_issue["title"] = text[i1+2...i2-1]
-              new_issue["body"] = text[i2+2...-1]
-              make_issue(new_issue)
-              ret = {:text => "created"}.merge(options).to_json
-            else
-              new_issue["title"] = text[i1+2...-1]
-              err = make_issue(new_issue)
-              if err == nil
-                ret = {:text => "created"}.merge(options).to_json
-              else
-                ret = {:text => ("creation faild:" + err)}.merge(options).to_json
-              end
-            end
-
-          else
-            ret = {:text => "make issue t:(title)[b:body]"}.merge(options).to_json
+          text = text.match(/todo:\s*t\s*:\s*"(.*?)"\s*(\s*b\s*:\s*"(.*?)")?/)
+          new_issue = {:title => "default",:body => "Not edited yet \(created by Swimmy\)"}
+          new_issue["title"] = text[1] unless text[1].nil?
+          if text[3].nil? # create an issue with default body
+            res = make_issue(new_issue)
+          else 
+            new_issue["body"] = text[3] 
+            res = make_issue(new_issue)
           end
+          title_url = make_link(res["html_url"], new_issue["title"])
+          respond_text = "New issue created to #{OWNER}/#{REPO}! See here: #{title_url}"
+          ret = {:text => respond_text}.merge(options).to_json
 
         else
-          ret = {:text => "usage:\n \nget issue\nmake issue :t(title)[b:(body)]"}.merge(options).to_json
+          ret = {:text => "usage:\n \ntodo: list\ntodo: t:\"type title\" [b:\"type body (optional)\"]"}.merge(options).to_json
         end
         return ret
       end
 
       private
       def issue_com_dic(str)
-        if (crud=str.match(/get issue/)) != nil
+        if (crud=str.match(/todo: list/)) != nil
           return ["r",0]
-        elsif (i = str.index("make issue")) != nil
+        elsif (i = str.index("todo: ")) != nil
           return ["c",i]
         else
           return "n"
@@ -100,12 +91,11 @@ module Swimmy
       end
 
       def get_issues
-        git_username = ENV['GIT_USERNAME']
-        git_password = ENV['GIT_PASSWORD'] 
-        uri = URI.parse(GITHUB_API)
+        ghtoken = ENV['GH_TOKEN']
+        uri = URI.parse(ISSUE_URL)
         request = Net::HTTP::Get.new(uri)
-        request.basic_auth(git_username, git_password)
-        req_options = {use_ssl: uri.scheme == "https"}
+        request['Authorization'] = "token #{ghtoken}"
+        req_options = { use_ssl: uri.scheme == "https" }
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
           http.request(request)
         end
@@ -113,17 +103,18 @@ module Swimmy
       end
 
       def make_issue(issue)
-        git_username = ENV['GIT_USERNAME']
-        git_password = ENV['GIT_PASSWORD'] 
-        uri = URI.parse(GITHUB_API)
+        ghtoken = ENV['GH_TOKEN']
+        uri = URI.parse(ISSUE_URL)
         request = Net::HTTP::Post.new(uri)
-        request.basic_auth(git_username, git_password)
-        request.body = issue.to_json
-        req_options = {use_ssl: uri.scheme == "https"}
+        request['Authorization'] = "token #{ghtoken}"
+        p request.body = issue.to_json
+        req_options = { use_ssl: uri.scheme == "https" }
         response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
           http.request(request)
         end
-        return JSON.parse(response.body)["message"]
+        res = JSON.parse(response.body)
+
+        return res
       end
 
       def make_link(url,label)
