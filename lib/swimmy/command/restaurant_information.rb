@@ -164,7 +164,7 @@ module Swimmy
 
         res = extract_data_from_json(place_detail)
         photo = get_place_photo(photo_ref)
-        photo = photo.body # html
+        p photo = photo.body # html
         photo = extract_photo_url(photo)
 
         user_name = params[:user_name] ? "<@#{params[:user_name]}>" : ""
