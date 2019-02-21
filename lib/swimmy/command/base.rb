@@ -6,8 +6,12 @@ module Swimmy
       @sheet_service
     end
 
+    def self.sheet_config
+      @sheet_config
+    end
+
     class << self
-      attr_writer :sheet_service
+      attr_writer :sheet_service, :sheet_config
     end
 
     #

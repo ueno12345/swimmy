@@ -1,4 +1,3 @@
-require 'celluloid'
 require 'slack-ruby-bot'
 
 ##

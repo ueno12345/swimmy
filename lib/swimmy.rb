@@ -3,5 +3,6 @@ module Swimmy
 
   autoload :App,                  "#{dir}/app.rb"
   autoload :VERSION,              "#{dir}/version.rb"
+
   require "#{dir}/command.rb"
 end
