@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# coding: utf-8
+
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require 'net/https'
+require 'uri'
+require 'json'
+
+# swimmy/config/credentials.json に Google API Console の認証情報ページからダウンロードした JSON ファイルが配置されていることを想定している．
+json = File.open("config/credentials.json")
+credentials = JSON.load(json)
+
+CLIENT_ID = credentials["installed"]["client_id"]
+CLIENT_SECRET = credentials["installed"]["client_secret"]
+REDIRECT_URI = credentials["installed"]["redirect_uris"][0]
+
+url = "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=" + CLIENT_ID + "&redirect_uri=urn:ietf:wg:oauth:2.0:oob&scope=https://www.googleapis.com/auth/photoslibrary&access_type=offline"
+puts "Please open following URL and paste code."
+puts url
+
+auth_code = gets.chomp
+
+request = { :code => auth_code, :client_id => CLIENT_ID, :client_secret => CLIENT_SECRET, :redirect_uri => REDIRECT_URI, :grant_type => "authorization_code", :access_type => "offline" }
+uri = URI.parse("https://www.googleapis.com/oauth2/v4/token")
+
+res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  http.post(uri.request_uri, request.to_json, { "Content-Type" => "application/json" })
+end
+
+File.open("config/google-photo-token.json", "w") do |f| 
+  f.puts(res.body)
+end
