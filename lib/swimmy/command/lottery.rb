@@ -5,11 +5,11 @@ module Swimmy
       command "lottery" do |client, data, match|
         unless match[:expression]
           client.say(channel: data.channel, text: help_message)
-          return
+        else
+          result = WorkHorse.new(spreadsheet).draw(match[:expression].split)
+          message = result.map.with_index(1) {|m, i| "#{i} #{m}"}.join("\n")
+          client.say(channel: data.channel, text: message)
         end
-        result = WorkHorse.new(spreadsheet).draw(match[:expression].split)
-        message = result.map.with_index(1) {|m, i| "#{i} #{m}"}.join("\n")
-        client.say(channel: data.channel, text: message)
       end
 
       help do
