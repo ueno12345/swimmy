@@ -36,6 +36,10 @@ module Swimmy
         "#{command_name} - #{hlp.command_desc}\n\n#{hlp.command_long_desc}" if hlp
       end
 
+      def self.tick(&block)
+        SlackRubyBot::Server.on("pong", &block)
+      end
+
       def self.on(event_name, &block)
         SlackRubyBot::Server.on(event_name, &block)
       end
