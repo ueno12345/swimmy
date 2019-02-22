@@ -4,7 +4,7 @@ module Swimmy
 
       command "lottery" do |client, data, match|
         unless match[:expression]
-          client.say(channel: data.channel, text: help_message("lottery"))
+          client.say(channel: data.channel, text: help_message)
           return
         end
         result = WorkHorse.new(spreadsheet).draw(match[:expression].split)
