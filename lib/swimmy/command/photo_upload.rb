@@ -13,10 +13,12 @@ require 'net/https'
 # swimmy/exe/google_photo_auth を実行することで swimmy/config/google-photo-token.json が作成される
 TOKEN_FILE_PATH = "config/google-photo-token.json"
 
-credentials = JSON.load(File.open("config/credentials.json"))
+if File.exist?("config/credentials.json")
+  credentials = JSON.load(File.open("config/credentials.json"))
 
-CLIENT_ID = credentials["installed"]["client_id"]
-CLIENT_SECRET = credentials["installed"]["client_secret"]
+  CLIENT_ID = credentials["installed"]["client_id"]
+  CLIENT_SECRET = credentials["installed"]["client_secret"]
+end
 
 module Swimmy
   module Command
