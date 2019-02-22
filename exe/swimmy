@@ -26,11 +26,7 @@ Encoding.default_external = "UTF-8"
 Thread.abort_on_exception = true
 
 require "rubygems"
-
-require "clian"
-require "sheetq"
 require "swimmy"
-require "logger"
 require "dotenv"
 
 Dotenv.load
@@ -38,46 +34,33 @@ Dotenv.load
 ################################################################
 ### Main thread
 
-unless ENV["SLACK_API_TOKEN"]
-  STDERR.puts "Error: env SLACK_API_TOKEN is not set."
-  exit 1
+error_count = 0
+env_names = %w(SLACK_API_TOKEN SWIMMY_SHEET_ID)
+
+env_names.each do |env_name|
+  unless ENV[env_name]
+    STDERR.puts "Error: env #{env_name} is not set."
+    error_count += 1
+  end
 end
 
-sheetq_config_path = "~/.config/sheetq/config.yml"
-sheetq_config = Sheetq::Config.create_from_file(sheetq_config_path)
-sheetq_tokenstore = File.expand_path("token_store.yml", File.dirname(sheetq_config_path))
-
-logger = ::Logger.new($stderr)
-logger.formatter = proc {|severity, datetime, progname, msg| "#{datetime} #{msg}\n"}
-Sheetq::Command.logger = logger
-
-puts "#{sheetq_config.general.client_id},#{sheetq_config.general.client_secret},#{sheetq_tokenstore},#{sheetq_config.general.default_user},#{logger}"
-
-Swimmy::Command.sheet_config = sheetq_config
-client = Sheetq::GoogleClient.new(
-  sheetq_config.general.client_id,
-  sheetq_config.general.client_secret,
-  sheetq_tokenstore,
-  sheetq_config.general.default_user,
-  logger
-)
-
-Sheetq::Command.client = client
-spreadsheet = sheetq_config.general.default_sheet_id
-puts sheetq_config.general.default_user
-puts sheetq_tokenstore
-puts "swimmy client: #{client}"
-client.auth
-
-Sheetq::Command::Nomnichi.new(spreadsheet, true)
+exit 1 if error_count > 0
 
 loop do
   begin
-    bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"])
+    bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"],
+                          spreadsheet: ENV["SWIMMY_SHEET_ID"])
     bot.start!
+
+  rescue Interrupt
+    # Control-c to exit
+    STDERR.puts "Interrupted exiting..."
+    exit!
+
   rescue Exception => e
-    STDERR.puts "Error: #{e}"
-    STDERR.puts "wait 30 secs"
-    sleep 30
+    # Maybe network error, reconnect.
+    STDERR.puts "Error: #{e} (#{e.class})"
+    STDERR.puts "wait 20 secs"
+    sleep 20
   end
 end

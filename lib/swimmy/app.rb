@@ -1,25 +1,23 @@
-require 'slack-ruby-bot'
+#
+# loop do
+#   begin
+#     bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"])
+#     bot.start!
+#   rescue Exception => e
+#     STDERR.puts "Error: #{e}"
+#     STDERR.puts "wait 30 secs"
+#     sleep 30
+#   end
+# end
+#
 
-##
-## loop do
-##   begin
-##     bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"])
-##     bot.start!
-##   rescue Exception => e
-##     STDERR.puts "Error: #{e}"
-##     STDERR.puts "wait 30 secs"
-##     sleep 30
-##   end
-## end
-##
+require "celluloid"
+require "slack-ruby-bot"
+
 module Swimmy
-  SlackRubyBot.configure do |config|
-    config.send_gifs = false
-  end
-
   ## Ping thread to maintain connections
   ##  see https://github.com/slack-ruby/slack-ruby-bot/issues/107
-  class PingThread  < SlackRubyBot::Server
+  class Watchdog  < SlackRubyBot::Server
     extend Celluloid
 
     PONG_ID_QUEUE = []
@@ -57,5 +55,37 @@ module Swimmy
 
   ## Main app
   class App < SlackRubyBot::Server
-  end
-end
+
+    def initialize(opt)
+      if opt[:spreadsheet]
+        Swimmy::Command.spreadsheet =
+          initialize_spreadsheet(opt[:spreadsheet])
+        opt.delete(:spreadsheet)
+      end
+
+      super(opt)
+    end
+
+    private
+
+    def initialize_spreadsheet(spreadsheet_id)
+      require "clian"
+      require "sheetq"
+
+      dir = "~/.config/sheetq/"
+
+      config = Sheetq::Config.create_from_file(File.expand_path("config.yml", dir))
+
+      client = Sheetq::GoogleClient.new(
+        config.general.client_id,
+        config.general.client_secret,
+        File.expand_path("token_store.yml", dir),
+        config.general.default_user
+      )
+
+      client.auth
+      return Sheetq::Service::Spreadsheet.new(client, spreadsheet_id)
+    end
+
+  end # class App
+end # module Swimmy
