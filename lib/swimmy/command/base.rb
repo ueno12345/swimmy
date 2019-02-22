@@ -10,6 +10,13 @@ module Swimmy
       attr_writer :sheet_service
     end
 
+    #
+    # class YourCommand < Swimmy::Command::Base
+    #   match /hey (.*)/ do |client, data, match|
+    #     ...
+    #   end
+    # end
+    #
     class Base < SlackRubyBot::Commands::Base
     end
   end
