@@ -1,44 +1,60 @@
-# coding: utf-8
-
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
 module Swimmy
   module Command
-    class Lottery_matcher < SlackRubyBot::Commands::Base
-      match(/.*lottery.*/) do |client, data, match|
-        array = match.to_s.partition(/参加者:/)
-        participant = array[2].split(",")
-        result = Lottery.new.exec(participant)
-        client.say(channel: data.channel, text: "This message send by lottery.\nUsage: lottery 参加者:person1, person2, .. ,personN\nresult is #{result}")
-      end
-    end
+    class Lottery < Swimmy::Command::Base
 
-    class Lottery
-      def exec(participant)
-        participant = get_members(participant)
-        rank = participant.shuffle
-        result = {}
-        participant.each{ |person|
-          result[person] = rank.index(person) + 1
-        }
-        return result
+      command "lottery" do |client, data, match|
+        unless match[:expression]
+          client.say(channel: data.channel, text: help_message("lottery"))
+          return
+        end
+        result = WorkHorse.new(spreadsheet).draw(match[:expression].split)
+        message = result.map.with_index(1) {|m, i| "#{i} #{m}"}.join("\n")
+        client.say(channel: data.channel, text: message)
       end
 
-      private
+      help do
+        title "lottery"
+        desc "クジ引きを作ってくれます．"
+        long_desc "lottery name1 name2 ...\n" +
+                  "name1, name2 は，参加者名もしくはグループ名です．" +
+                  "グループ名には，%gn のように % で始めて下さい．" +
+                  "全員を表すグループは，%all です．"
+      end
 
-      #This func only move nomlab, but this func shoudl move GN, New, B4, M1, M2
-      def get_members(participant)
-        # This array shoud be made by google spread sheet
-        nomlab = ["nom", "ishikawa", "suzuki", "tsubokawa", "ogura-i", "nishi", "yamamoto-e", "takaie", "takahashi", "fujiwara-yu", "yoshida-s"]
-        participant.each{ |person|
-          if person == "nomlab" then
-            participant.delete(person)
-            participant = participant + nomlab
+      ################################################################
+      ### private inner class
+
+      class WorkHorse
+        require "sheetq"
+        attr_reader :spreadsheet
+
+        def initialize(spreadsheet)
+          @spreadsheet = spreadsheet
+        end
+
+        def draw(participants)
+          all_members = spreadsheet.sheet("members", Sheetq::Resource::Member).fetch.select {|m| m.active? }
+          members = []
+
+          participants.each do |name|
+            case name
+            when /^%all$/
+              members += all_members.map(&:name)
+
+            when /^%(.*)/
+              team = $1.downcase
+              members += all_members.select {|m|
+                m.team.split(/ *, */).map(&:downcase).include?(team)
+              }.map(&:name)
+            else
+              members << name
+            end
           end
-        }
-        return participant
+          members.uniq.shuffle
+        end
       end
+      private_constant :WorkHorse
 
-    end# class Lottery
-  end# module Command
-end# module Swimmy
+    end # class Lottery
+  end # module Command
+end # module Swimmy
