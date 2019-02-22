@@ -30,6 +30,11 @@ module Swimmy
         Swimmy::Command.spreadsheet
       end
 
+      def self.help_message(command_name)
+        hlp = SlackRubyBot::Commands::Support::Help.instance.find_command_help_attrs(command_name)
+        "#{command_name} - #{hlp.command_desc}\n\n#{hlp.command_long_desc}" if hlp
+      end
+
       def self.on(event_name, &block)
         SlackRubyBot::Server.on(event_name, &block)
       end
