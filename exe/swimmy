@@ -22,22 +22,30 @@ if File.exists?(gemfile + ".lock")
   require "bundler/setup"
 end
 
-require "rubygems"
-require 'swimmy'
-require 'dotenv'
-Dotenv.load
-
-Encoding.default_external="UTF-8"
+Encoding.default_external = "UTF-8"
 Thread.abort_on_exception = true
 
-Thread.new do
-  Swimmy::Web.run!
+require "rubygems"
+require "swimmy"
+require "dotenv"
+
+Dotenv.load
+
+################################################################
+### Main thread
+
+unless ENV["SLACK_API_TOKEN"]
+  STDERR.puts "Error: env SLACK_API_TOKEN is not set."
+  exit 1
 end
 
-begin
-  Swimmy::App.instance.run
-rescue Exception => e
-  STDERR.puts "ERROR: #{e}"
-  STDERR.puts e.backtrace
-  raise e
+loop do
+  begin
+    bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"])
+    bot.start!
+  rescue Exception => e
+    STDERR.puts "Error: #{e}"
+    STDERR.puts "wait 30 secs"
+    sleep 30
+  end
 end
