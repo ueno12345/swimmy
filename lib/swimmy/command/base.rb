@@ -40,6 +40,10 @@ module Swimmy
         SlackRubyBot::Server.on("pong", &block)
       end
 
+      # Can remove this in the future?
+      #   Define hooks from within the bot instance #211
+      #   https://github.com/slack-ruby/slack-ruby-bot/issues/211
+      #
       def self.on(event_name, &block)
         SlackRubyBot::Server.on(event_name, &block)
       end
