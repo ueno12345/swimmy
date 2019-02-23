@@ -55,12 +55,15 @@ loop do
   rescue Interrupt
     # Control-c to exit
     STDERR.puts "Interrupted exiting..."
+
+    bot.stop!
     exit!
 
   rescue Exception => e
     # Maybe network error, reconnect.
     STDERR.puts "Error: #{e} (#{e.class})"
     STDERR.puts "wait 20 secs"
+    bot.stop!
     sleep 20
   end
 end
