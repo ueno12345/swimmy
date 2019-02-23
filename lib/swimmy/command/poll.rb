@@ -23,13 +23,13 @@ module Swimmy
         params = JSON.parse(json, symbolize_names: true)
         res = Poll.new.response(params)
         text = JSON.parse(res)
-        client.say(channel: data.channel, text: text["text"])
-        # channels.history という API を用いるためには，ユーザ用の token に切り替える必要がある．
-        client.web_client.token = ENV["SLACK_API_TOKEN_USER"]
-        # 最新の message を channels.history で取得する際，bot の発言が反映されない場合があるため，0.5 秒待つ．検討の余地あり．
-        sleep(0.5)
-        $poll[:ts] = client.web_client.channels_history(channel: data.channel)["messages"][0]["ts"]
-        client.web_client.token = client.token
+
+        res = client.web_client.chat_postMessage(
+          channel: data.channel,
+          as_user: true,
+          text: text["text"]
+        )
+        $poll[:ts] = res.message.ts
         $poll[:choices].each_with_index do |choice, i|
           client.web_client.reactions_add(name: $emoji_list[i][1], channel: data.channel, timestamp: $poll[:ts])
         end
