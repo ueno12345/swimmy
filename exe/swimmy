@@ -46,16 +46,39 @@ end
 
 exit 1 if error_count > 0
 
-bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"],
-                      spreadsheet: ENV["SWIMMY_SHEET_ID"])
-
+# 以下のよう run を使うと client オブジェクトのの後始末をしてくれたり，
+# 再接続を試みたりしてくれて，嬉しいのだけど，内部で実装されている再接
+# 続の実装が少々問題．
+#
+#  1秒周期で走るのでうるさい．
+#  特定の exception しかキャッチしない．
+# Swimmy::App は，SlackRubyBot::Server を継承しているので，その中で
+# run にモンキーパッチを当てるのが手っ取り早い．
+#
+# loop do
+#   begin
+#     Swimmy::App.new(token: ENV["SLACK_API_TOKEN"],
+#                     spreadsheet: ENV["SWIMMY_SHEET_ID"]).run
+#   rescue Exception => e
+#     # Maybe network error, reconnect.
+#     STDERR.puts "Error: #{e} (#{e.class})"
+#     STDERR.puts "wait 10 secs"
+#     sleep 10
+#   end
+# end
+#
+# 今のところ，とりあえず，当初の物に戻しておく↓
+#
 loop do
   begin
+    bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"],
+                          spreadsheet: ENV["SWIMMY_SHEET_ID"])
     bot.start!
 
   rescue Interrupt
     # Control-c to exit
     STDERR.puts "Interrupted exiting..."
+    bot.stop!
     exit!
 
   rescue Exception => e
@@ -65,3 +88,6 @@ loop do
     sleep 20
   end
 end
+
+# ただし，タイミングによっては，Swimmy::App のインスタンスが二重に生成
+# されるような気がするので，要観察．
