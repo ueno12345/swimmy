@@ -1,112 +1,36 @@
-# coding: utf-8
-#
 # Yutaro Takaie / nomlab
 # This is a part of https://github.com/nomlab/swimmy
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-
-require 'json'
-require 'rexml/document'
-require 'open-uri'
-require 'nkf'
-require 'pp'
-require 'net/http'
-require 'singleton'
-require 'kconv'
-require 'slack-ruby-bot'
-require 'base'
+require "pp"
 
 module Swimmy
   module Command
-    class Rain_information_match < Swimmy::Command::Base
-      match(/雨の状況/) do |client, data, match|
-        json = {:user_name => data.user, :text => data.text}.to_json
-        params = JSON.parse(json, symbolize_names: true)
-        res = Rain_information.new.rain_info(params)
-        text = JSON.parse(res)
-        client.say(channel: data.channel, text: text["text"])
-      end
-    end
+    class RainInformation < Base
+      match(/(?:(?<place>\S+)の)?雨の状況/) do |client, data, match|
+        place = (match[:place] || "岡山大学")
+        client.say(channel: data.channel, text: "#{place}の天気取得中…")
 
-    class Rain_information
-      private
-      def get_locate(params)
-        place_info = params[:text].sub(/の雨の状況.*/,'').sub(/.* /,'').sub(/\n/,'')
-
-        p place_info
-        encoded_address = URI.encode(place_info)
-        url = "http://www.geocoding.jp/api/?q=" + encoded_address
-        p url
-        result = open(url).read.toutf8
-
-        doc = REXML::Document.new(result)
-        return "error" if doc.elements['result/error'] != nil
-
-        lat = doc.elements['result/coordinate/lat'].text
-        lng = doc.elements['result/coordinate/lng'].text
-        return  lng + ',' + lat
-      end
-
-      def rain_power(info)
-        if info == 0 
-          return "降っていない"
-        elsif info < 10 
-          return "雨"
-        elsif info < 20 
-          return "やや強い雨"
-        elsif info < 30 
-          return "強い雨"
-        elsif info < 50 
-          return "激しい雨"
-        elsif info < 80 
-          return "非常に激しい雨"
-        elsif info >= 80
-          return "猛烈な雨"
-        else
-          return "error"
+        begin
+          location = Service::Geocoding.new.find_location(place)
+          weather = Service::Weather.new(ENV['YAHOO_API_KEY']).fetch_weather(location)
+          message = weather.to_s
+        rescue Service::Geocoding::NotFoundError
+          message = "#{place}の位置情報が分かりませんでした．"
+        rescue Service::Weather::NotFoundError
+          message = "#{place}の天気が分かりませんでした(もしかして国外?)．"
+        ensure
+          message ||= "#{place}の天気の取得に失敗しました"
+          client.say(channel: data.channel, text: message)
         end
       end
 
-      public
-      def rain_info(params,options = {})
-        yahoo_api = ENV['YAHOO_API_KEY']
-        text = ""
-        base_uri = "https://map.yahooapis.jp/weather/V1/place?"
-        output = "output=json"
-
-        if (params[:text] !~ /の雨の状況/)
-          place = "133.922223,34.687387"
-        elsif (place = get_locate(params)) == "error"
-          text = "not found\n"
-          return {text: "#{text}"}.merge(options).to_json
-        end
-
-        p place
-        client_id = "appid="
-        rain_uri = base_uri + output + "&" + "coordinates=" + place + "&" + client_id + yahoo_api
-
-        p rain_uri
-
-        uri = URI.parse(rain_uri)
-        json = Net::HTTP.get(uri)
-        result = JSON.parse(json)
-
-        if  result['Feature'][0]['Property']['WeatherList']['Weather'][0]['Rainfall'] == nil
-          text="Japan Only"
-          return {text: "#{text}"}.merge(options).to_json
-        end
-
-        info = []
-        (0..6).each do |num|
-          info << result['Feature'][0]['Property']['WeatherList']['Weather'][num]['Rainfall']
-        end
-
-        (0..6).each do |num|
-          text = text + "#{num*10}分後は #{rain_power(info[num])}(降水強度: #{info[num]}mm/h)\n"
-        end
-
-        return {text: "#{text}"}.merge(options).to_json
+      help do
+        title "rain_information"
+        desc "雨の状況を教えてくれます．"
+        long_desc "「XXの雨の状況」とつぶやいてみてください\n" +
+                  "XXは，都市名です．例: 岡山の雨の状況\n" +
+                  "都市名を省略して「雨の状況」だと岡山大学周辺の雨の状況を知らせます．\n"
       end
-    end
-  end
-end
+    end # class RainInformation
+    end # module Command
+end # module Swimmy
