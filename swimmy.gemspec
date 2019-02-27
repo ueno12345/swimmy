@@ -6,8 +6,8 @@ require "swimmy/version"
 Gem::Specification.new do |spec|
   spec.name          = "swimmy"
   spec.version       = Swimmy::VERSION
-  spec.authors       = ["Yuuki Fujiwara"]
-  spec.email         = ["fujiwara2018@s.okayama-u.ac.jp"]
+  spec.authors       = ["Nomura Laboratory"]
+  spec.email         = [""]
 
   spec.summary       = %q{Operate SlackBot.}
   spec.homepage      = "https://github.com/nomlab/swimmy"
