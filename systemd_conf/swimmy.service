@@ -1,0 +1,14 @@
+[Unit]
+Description = swimmy daemon
+
+[Service]
+WorkingDirectory=/home/nomlab/swimmy
+ExecStart=/bin/sh -c 'exec /home/nomlab/swimmy/exe/swimmy >> /var/log/swimmy.log 2>&1'
+User=nomlab
+Group=nomlab
+Type=simple
+Restart=on-failure
+EnvironmentFile=/etc/default/swimmy_env
+
+[Install]
+WantedBy=multi-user.target
