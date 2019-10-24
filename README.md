@@ -21,9 +21,13 @@ swimmyとは，B4新人課題で作成した各々のSlackBotを1つにまとめ
   - 出発地点から到着地点までの距離
   - 出発地点から到着地点までの移動にかかる時間
   - 出発地点から到着地点までの経路の詳細を示した Google Map へのリンク
-- 直近60分後の降水強度予測を発言する機能 
+- 直近60分後の降水強度予測を発言する機能
 - 設定された GitHub リポジトリに issue を作成，または issue の一覧を発言する機能
-- 入力された飲食店の情報を発言する機能 
+- 入力された飲食店の情報を発言する機能
+- Slackに写真がアップロードされた際，写真をGoogle Photonにもアップロードする機能
+- いいねが100をqiitaの記事をお知らせする機能
+- ノムニチの記事を書く人を選ぶ機能
+- 投票を作成する機能
 - 上記のどの機能にも該当しない場合に使用方法を発言する機能
 
 
@@ -72,67 +76,43 @@ swimmyとは，B4新人課題で作成した各々のSlackBotを1つにまとめ
     - アプリケーション情報を入力し，「ガイドラインに同意する」にチェックを入れ，「確認」をクリックする．
     - Client ID を取得する．なお，Client ID を API キーとして用いる．
 
-- 本プログラムは Heroku を用いて SlackBot を動作させることを想定している．
-  - Heroku の設定については [Heroku の利用手順](https://github.com/nomlab/nompedia/wiki/Tips#heroku%E3%81%AE%E5%88%A9%E7%94%A8%E6%89%8B%E9%A0%86)を参照
-
-- Heorku-CLI を用いて API キーと GitHub のログイン ID と パスワードを Heroku の環境変数に追加する．
-
-  ```
-  $ heroku config:set <KEY_NAME> = "XXXXXXXXXXXX"
-  ```
-
-- ローカルで実行する場合，次の手順で環境変数を設定する．
+- APIキーの設定
   - 以下のコマンドを実行し，settings.yml.sample を settings.yml に変更
 
     ```
     $ cp settings.yml.sample settings.yml
     ```
+    取得したAPIキーをファイルに記述する．
 
-  - 取得した API キー，ログインID，パスワードを settings.yml に以下の形式で書き込む．
+- sheetqの設定
+  https://github.com/nomlab/sheetqにしたがって設定を行う．
 
+- systemdの設定
+  - 以下のコマンドを実行する．
     ```
-    <key_name>: XXXX
+    $ cp systemd_conf/swimmy.service /etc/systemd/system/swimmy.service
+    $ cp systemd_conf/swimmy_env /etc/default/swimmy_env
     ```
 
+  - コピーした`swimmy.service`について，以下の項目を環境に合わせて設定する．
+    ```
+    5 WorkingDirectory=/home/nomlab/swimmy
+    6 ExecStart=/bin/sh -c 'exec /home/nomlab/swimmy/exe/swimmy >> /var/log/swimmy.log 2>&1'
+    7 User=nomlab
+    8 Group=nomlab
+    ```
+
+  - コピーした`swimmy_env`について，PATHを環境に合わせて設定する．
 
 
 # Run
-- Heroku 上で動作させる場合
-  - Heroku へのデプロイ方法については [Heroku の利用手順](https://github.com/nomlab/nompedia/wiki/Tips#heroku%E3%81%AE%E5%88%A9%E7%94%A8%E6%89%8B%E9%A0%86)を参照
+以下のコマンドを実行することでswimmyを起動できる．
+```
+$ sudo systemctl start swimmy
+```
 
-- ローカルで実行する場合
-  - 以下のコマンドを実行する．
+また，以下のコマンドを実行することでswimmyを停止できる．
+```
+$ sudo systemctl stop swimmy
+```
 
-    ```
-    $ bundle exec rackup config.ru
-    ```
-
-# Add your SlackBot to swimmy
-本プログラムは，作成した各々の機能を module として追加し，Swimmy.rb で include して発言内容に応じて呼び出す．
-- 機能の追加に必要な API キー等の非公開情報を設定する．
-  - ローカルで実行するためには settings.yml に書き込む．
-  - Heroku 上で動作させるためには環境変数を設定する．
-- SlackBot.rb でAPIキー等を以下の形式で呼び出す．
-
-  ```
-  @<variable> = ENV['<KEY_NAME>'] || @config["<key_name>"]
-  ```
-
-- 追加する機能を実装した module を作成する．
-- Swimmy.rb に作成した module を include し，特定の文字列が POST された際に，この module を呼び出す処理を追加する．
-- Swimmy.rb に使用方法を記述する．
-
-
-# Test
-
-- Slack や他の Web サービスの Outgoing WebHooks を用いた機能のテストをローカルで行いたい場合， test ディレクトリ以下の post_test.rb を利用する．
-
-- Outgoing WebHooks によって POST される内容を test/test.json に記述．
-
-- 上述の「Run」に示す，ローカルで実行する場合の手順に従った上で，以下のコマンドを用いる．
-
-  ```
-  $ ruby test/post_test.rb http://localhost:<port>/<path> test/test.json
-  ```
-
-  - 上記のコマンドでは，第1引数にPOST先URL，第2引数にPOSTするJSONが格納されているファイルパスを指定する．
