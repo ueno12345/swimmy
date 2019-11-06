@@ -1,3 +1,4 @@
+# coding: utf-8
 module Swimmy
   module Command
     class Nomnichi < Swimmy::Command::Base
@@ -39,7 +40,7 @@ module Swimmy
         private
 
         def nomnichi_active_members
-          spreadsheet.sheet("members", Sheetq::Resource::Member).fetch.select {|m| m.active? }.map(&:account)
+          spreadsheet.sheet("members", Swimmy::Resource::Member).fetch.select {|m| m.active? }.map(&:account)
         end
 
         def fetch_nomnichi_articles

@@ -1,3 +1,4 @@
+# coding: utf-8
 module Swimmy
   module Command
     class Lottery < Swimmy::Command::Base
@@ -33,7 +34,7 @@ module Swimmy
         end
 
         def draw(participants)
-          all_members = spreadsheet.sheet("members", Sheetq::Resource::Member).fetch.select {|m| m.active? }
+          all_members = spreadsheet.sheet("members", Swimmy::Resource::Member).fetch.select {|m| m.active? }
           members = []
 
           participants.each do |name|
