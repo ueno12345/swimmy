@@ -4,5 +4,6 @@ module Swimmy
 
     autoload :Place,       "#{dir}/place.rb"
     autoload :Weather,     "#{dir}/weather.rb"
+    autoload :Member,     "#{dir}/member.rb"
   end
 end
