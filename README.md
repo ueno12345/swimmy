@@ -90,8 +90,13 @@ swimmyとは，B4新人課題で作成した各々のSlackBotを1つにまとめ
 - systemdの設定
   - 以下のコマンドを実行する．
     ```
+	# root ユーザ
     $ cp systemd_conf/swimmy.service /etc/systemd/system/swimmy.service
     $ cp systemd_conf/swimmy_env /etc/default/swimmy_env
+
+	# 非 root ユーザ
+	$ cp systemd_conf/user/swimmy.service ~/.config/systemd/user/swimmy.service
+    $ cp systemd_conf/swimmy_env ~/.config/systemd/user/swimmy_env
     ```
 
   - コピーした`swimmy.service`について，以下の項目を環境に合わせて設定する．
@@ -108,11 +113,19 @@ swimmyとは，B4新人課題で作成した各々のSlackBotを1つにまとめ
 # Run
 以下のコマンドを実行することでswimmyを起動できる．
 ```
+# root ユーザ
 $ sudo systemctl start swimmy
+
+# 非 root ユーザ
+$ systemctl --user start swimmy
 ```
 
 また，以下のコマンドを実行することでswimmyを停止できる．
 ```
+# root ユーザ
 $ sudo systemctl stop swimmy
+
+# 非 root ユーザ
+$ systemctl --user stop swimmy
 ```
 

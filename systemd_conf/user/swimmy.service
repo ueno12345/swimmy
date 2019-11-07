@@ -1,0 +1,12 @@
+[Unit]
+Description = swimmy daemon
+
+[Service]
+WorkingDirectory=/home/nomlab/swimmy
+ExecStart=/bin/sh -c 'exec /home/nomlab/swimmy/exe/swimmy >> /home/nomlab/swimmy/swimmy.log 2>&1'
+Type=simple
+Restart=on-failure
+EnvironmentFile=/home/nomlab/.config/systemd/user/swimmy_env
+
+[Install]
+WantedBy=default.target
