@@ -75,9 +75,12 @@ loop do
                           spreadsheet: ENV["SWIMMY_SHEET_ID"])
     bot.start!
 
-  rescue Interrupt
-    # Control-c to exit
-    STDERR.puts "Interrupted exiting..."
+  rescue Interrupt, SignalException => e
+    # Interrupt: SIGINT (Control-c)
+    # SignalException: Other signals
+    #   https://docs.ruby-lang.org/ja/latest/class/SignalException.html
+    # XXX: SIGUSR1 should restart the bot?
+    STDERR.puts "Interrupted #{e.message} exiting..."
     bot.stop!
     exit!
 
@@ -85,6 +88,10 @@ loop do
     # Maybe network error, reconnect.
     STDERR.puts "Error: #{e} (#{e.class})"
     STDERR.puts "wait 20 secs"
+
+    # XXX: cause ClientNotStartedError if bot is not started.
+    bot.stop! rescue nil
+
     sleep 20
   end
 end
