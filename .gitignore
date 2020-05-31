@@ -35,3 +35,7 @@ attic/
 .env
 vendor/
 .bundle/
+
+################
+## rspec failure tracking
+.rspec_status
