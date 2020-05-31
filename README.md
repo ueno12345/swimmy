@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/nomlab/swimmy/workflows/Ruby/badge.svg)](https://github.com/nomlab/swimmy/actions?query=workflow%3Abuild)
+[![Actions Status](https://github.com/nomlab/swimmy/workflows/build/badge.svg)](https://github.com/nomlab/swimmy/actions?query=workflow%3Abuild)
 # swimmy
 swimmyとは，B4新人課題で作成した各々のSlackBotを1つにまとめたものである．本プロジェクト名は，絵本作家レオ・レオニ作の絵本「swimmy」に由来し，各々のプログラムをまとめた1つの成果物を表している．
 
