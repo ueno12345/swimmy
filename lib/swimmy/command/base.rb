@@ -26,16 +26,31 @@ module Swimmy
     end
 
     class Base < SlackRubyBot::Commands::Base
+
+      # You can use spreadsheet object in your command
       def self.spreadsheet
         Swimmy::Command.spreadsheet
       end
 
+      # Create help_message for your command.
+      # You can use in your command, for example:
+      #   command "lottery" do |client, data, match|
+      #     unless match[:expression]
+      #       client.say(channel: data.channel, text: help_message)
+      #     else
+      #       ...
       def self.help_message(command_name = nil)
         command_name ||= command_name_from_class
         hlp = SlackRubyBot::Commands::Support::Help.instance.find_command_help_attrs(command_name)
         "#{command_name} - #{hlp.command_desc}\n\n#{hlp.command_long_desc}" if hlp
       end
 
+      # You can Create periodic task by using tick.
+      #   tick do |client, data|
+      #     CHANNEL_LIST.each do |channel|
+      #       client.say(channel: channel, text: "Hi!")
+      #     end
+      #   end
       def self.tick(&block)
         SlackRubyBot::Server.on("pong", &block)
       end
