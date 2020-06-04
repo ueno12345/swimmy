@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/nomlab/sheetq.git
-  revision: 96b1015dcb85417a662892f41f7589efed679a07
+  revision: 9b0844dc93c887b8cfa3c2f555c6a4815628e51a
   specs:
     sheetq (0.1.0)
       clian (>= 0.4.1)
