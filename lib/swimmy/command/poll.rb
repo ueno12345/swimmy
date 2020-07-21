@@ -18,7 +18,7 @@ $poll = {ts: 0, title: "", choices: [], count: []}
 module Swimmy
   module Command
     class PollMatch < Swimmy::Command::Base
-      match(/poll/) do |client, data, match|
+      command "poll" do |client, data, match|
         json = {:user_name => data.user, :text => data.text}.to_json
         params = JSON.parse(json, symbolize_names: true)
         res = Poll.new.response(params)
@@ -33,10 +33,20 @@ module Swimmy
         $poll[:choices].each_with_index do |choice, i|
           client.web_client.reactions_add(name: $emoji_list[i][1], channel: data.channel, timestamp: $poll[:ts])
         end
-
       end
+      
+      help do
+        title "poll"
+        desc "みんなからの投票を受付けます．"
+        long_desc "poll question answer1,answer2,...\n" +
+                  "questionは，みんなに聞きたい質問項目です．" +
+                  "answer1やanswer2は，選択肢です．" +
+                  "選択肢が複数ある場合は，半角コンマで区切ってください．" +
+                  "選択肢は最大9つまで入力できます．"
+      end
+      
     end
-
+    
     class PollCounter < SlackRubyBot::Server
       on 'reaction_added' do |client, data|
         p data
@@ -64,7 +74,7 @@ module Swimmy
         end
       end
     end
-
+    
     class Poll
       def response(params, options = {})
         query_str = params[:text]
