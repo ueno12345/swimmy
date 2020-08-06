@@ -13,6 +13,7 @@
 
 # require "celluloid"
 require "slack-ruby-bot"
+require "optparse"
 
 module Swimmy
   ## Ping thread to maintain connections
@@ -56,6 +57,11 @@ module Swimmy
 
   ## Main app
   class App < SlackRubyBot::Server
+    on "hello" do |client, data|
+      opt = OptionParser.new
+      opt.on('--hello ITEM', 'say hello') { |v| client.say(channel: ENV["POST_CHANNEL"], text: "#{v}") }
+      opt.parse(ARGV)
+    end
 
     def initialize(opt)
       if opt[:spreadsheet]
