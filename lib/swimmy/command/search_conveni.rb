@@ -34,10 +34,11 @@ module Swimmy
         end
           
         api = Api.new
-        if api.set_param() == -1
+        if ENV['GOOGLE_PLACES_API_KEY'] == nil
           client.say(channel: data.channel, text:"'GOOGLE_PLACES_API_KEY'が設定されていません．")
         else
           client.say(channel: data.channel, text:"検索中...")
+          api.set_api_key(ENV['GOOGLE_PLACES_API_KEY'])
           response = api.fetch(address)
           message = api.formatter(response, times)
           client.say(channel: data.channel, text: message)
@@ -55,17 +56,16 @@ module Swimmy
       end
       
       class Api
-        def set_param()
-          @API_KEY = ENV['GOOGLE_PLACES_API_KEY']
+        def initialize()
+          @API_KEY = nil
           @PLACE_API_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?"
           @PLACE_API_DETAIL_URL = "https://www.google.com/maps/search/?api=1&query=Google&query_place_id="
-          if @API_KEY == nil then
-            return -1
-          else
-            return 0
-          end
         end
-        
+
+        def set_api_key(api_key)
+          @API_KEY = api_key
+        end
+
         def fetch(address) 
           request_hash = {query: "#{address}",laungage: "ja",type: "convenience_store", key: "#{@API_KEY}"}
           request = URI.encode_www_form(request_hash)
@@ -101,4 +101,3 @@ module Swimmy
     end
   end
 end
-  
