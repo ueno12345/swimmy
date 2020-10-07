@@ -13,7 +13,7 @@ module Swimmy
 
         begin
           exe_file = Dir::pwd + "/exe/swimmy"
-          exec("bundle exec #{exe_file} --hello 再起動完了!")
+          exec("bundle exec #{exe_file} --hello #{data.channel}:再起動完了!")
         rescue => e
           client.say(channel: data.channel, text: "再起動に失敗しました．")
           raise e
