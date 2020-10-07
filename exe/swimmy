@@ -28,6 +28,7 @@ Thread.abort_on_exception = true
 require "rubygems"
 require "swimmy"
 require "dotenv"
+require "optparse"
 
 Dotenv.load
 
@@ -45,6 +46,11 @@ env_names.each do |env_name|
 end
 
 exit 1 if error_count > 0
+
+opt_hello = nil
+option = OptionParser.new
+option.on('--hello ITEM', 'say hello') { |v| opt_hello = v }
+option.parse(ARGV)
 
 # 以下のよう run を使うと client オブジェクトのの後始末をしてくれたり，
 # 再接続を試みたりしてくれて，嬉しいのだけど，内部で実装されている再接
@@ -69,10 +75,11 @@ exit 1 if error_count > 0
 #
 # 今のところ，とりあえず，当初の物に戻しておく↓
 #
+
 loop do
   begin
     bot = Swimmy::App.new(token: ENV["SLACK_API_TOKEN"],
-                          spreadsheet: ENV["SWIMMY_SHEET_ID"])
+                          spreadsheet: ENV["SWIMMY_SHEET_ID"], hello: opt_hello)
     bot.start!
 
   rescue Interrupt, SignalException => e
