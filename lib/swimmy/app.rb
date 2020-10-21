@@ -13,7 +13,6 @@
 
 # require "celluloid"
 require "slack-ruby-bot"
-require "optparse"
 
 module Swimmy
   ## Ping thread to maintain connections
@@ -59,12 +58,19 @@ module Swimmy
   class App < SlackRubyBot::Server
     on "hello" do |client, data|
       begin
-        client.say(channel: @@channel, text: @@msg)
+        ch = CHANNEL_QUEUE.shift
+        msg = MESSAGE_QUEUE.shift
+        if ch.start_with?("#")
+          ch = client.web_client.channels_info(channel: ch).channel.id
+        end
+        client.say(channel: ch, text: msg)
       rescue => e
         puts e
       end
     end
 
+    CHANNEL_QUEUE = []
+    MESSAGE_QUEUE = []
     def initialize(opt)
       if opt[:spreadsheet]
         Swimmy::Command.spreadsheet =
@@ -73,8 +79,8 @@ module Swimmy
       end
 
       if opt[:hello]
-        hello = opt[:hello].split(':')
-        initialize_hello(hello[0], hello[1])
+        ch, msg = opt[:hello].split(':', 2)
+        initialize_hello(ch, msg)
         opt.delete(:hello)
       end
 
@@ -103,8 +109,8 @@ module Swimmy
     end
 
     def initialize_hello(channel, msg)
-      @@channel = channel
-      @@msg = msg
+      CHANNEL_QUEUE << channel
+      MESSAGE_QUEUE << msg
     end
 
   end # class App
