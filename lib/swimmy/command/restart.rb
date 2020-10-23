@@ -8,17 +8,9 @@ module Swimmy
     class Restart < Swimmy::Command::Base
 
       command "restart" do |client, data, match|
-        puts client.class
         client.say(channel: data.channel, text: "再起動します")
-
         begin
-          exe_command = $0
-          if exe_command.start_with?('/')
-            exe_file = exe_command
-          else
-            exe_file = Dir::pwd + "/#{exe_command}"
-          end
-
+          exe_file = File.expand_path($0)
           exec("bundle exec #{exe_file} --hello #{data.channel}:再起動完了!")
         rescue => e
           client.say(channel: data.channel, text: "再起動に失敗しました．")
