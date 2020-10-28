@@ -9,13 +9,12 @@ module Swimmy
 
       command "restart" do |client, data, match|
         client.say(channel: data.channel, text: "再起動します")
-        begin
           exe_file = File.expand_path($0)
-          exec("bundle exec #{exe_file} --hello #{data.channel}:再起動完了!")
-        rescue => e
-          client.say(channel: data.channel, text: "再起動に失敗しました．")
-          raise e
-        end
+          if File.exist?(exe_file)
+            exec("bundle exec #{exe_file} --hello #{data.channel}:再起動完了!")
+          else
+            client.say(channel: data.channel, text: "再起動に失敗しました．")
+          end
       end
 
       help do
