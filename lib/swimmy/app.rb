@@ -58,18 +58,17 @@ module Swimmy
   class App < SlackRubyBot::Server
     on "hello" do |client, data|
       begin
-        ch = CHANNEL_QUEUE.shift
-        msg = MESSAGE_QUEUE.shift
+        message = MESSAGE_QUEUE.shift
+        ch, post_msg = message.split(':', 2)
         if ch.start_with?("#")
           ch = client.web_client.channels_info(channel: ch).channel.id
         end
-        client.say(channel: ch, text: msg)
+        client.say(channel: ch, text: post_msg)
       rescue => e
         puts e
       end
     end
 
-    CHANNEL_QUEUE = []
     MESSAGE_QUEUE = []
     def initialize(opt)
       if opt[:spreadsheet]
@@ -79,8 +78,7 @@ module Swimmy
       end
 
       if opt[:hello]
-        ch, msg = opt[:hello].split(':', 2)
-        initialize_hello(ch, msg)
+        MESSAGE_QUEUE << opt[:hello]
         opt.delete(:hello)
       end
 
@@ -108,10 +106,6 @@ module Swimmy
       return Sheetq::Service::Spreadsheet.new(client, spreadsheet_id)
     end
 
-    def initialize_hello(channel, msg)
-      CHANNEL_QUEUE << channel
-      MESSAGE_QUEUE << msg
-    end
 
   end # class App
 end # module Swimmy
