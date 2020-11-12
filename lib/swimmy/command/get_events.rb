@@ -15,12 +15,16 @@ require 'active_support/time'
 
 module Swimmy
   module Command
-    class SayEventsBot < Base
-      set = YAML.load_file('settings.yaml')
-      calendars = set["calendar_list"]
-      
+    class SayEventsBot < Base      
       command "today_event" do |client, data, match|
         client.say(channel: data.channel, text: "予定を取得中...")
+        begin 
+          set = YAML.load_file('settings.yaml')
+        rescue => e
+          client.say(channel: data.channel, text: "設定ファイルが見つかりません")
+        end
+        
+        calendars = set["calendar_list"]
         message = "今日(#{Date.today.strftime("%m/%d")})の予定\n"
         calendars.each do |calendar|
           message << calendar["name"] << "\n"
