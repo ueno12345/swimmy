@@ -4,9 +4,6 @@
 # 1. finish to install and set up sheetq
 # 2. environmental variable is written to "swimmy/.env"
 # 3. Docker is installed
-# 4. can use Docker without 'sudo'
-#  if you do not finish to set up 4, execute below command
-#  $ sudo usermod -aG docker $USER
 
 function usage(){
 cat <<_EOT_
@@ -24,86 +21,93 @@ Options:
     status    show swimmy's condition
     help      show this usage
 _EOT_
-return 0
 }
 
 function main(){
-    cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if ! user_is_member_of_dockergroup; then
+        echo "You have to be member of docker group"
+        exit 1
+    fi
 
-    case $1 in
-        "start")
+    cd "$(dirname "$0")"
+
+    case "$1" in
+        start)
             start
         ;;
-        "stop")
+        stop)
             stop
         ;;
-        "status")
+        status)
             status
         ;;
-        "help")
+        help)
             usage
         ;;
         *)
-            echo "Invalid option"
-            usage
+            echo "Invalid option" >&2
+            usage >&2
+            exit 1
         ;;
     esac
     return 0
 }
 
+function user_is_member_of_dockergroup(){
+    res=$(groups | grep -c -e docker -e root)
+    if [ $res = 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
 function start(){
-    check_swimmy_condition
-    if [ "$?" = "1" ]; then
+    if is_container_running swimmy; then
         echo "swimmy has already started"
     else
-        echo "try to start swimmy..."
+        echo -n "try to start swimmy..."
         docker run -d --name swimmy \
             -v $PWD/.env:/root/swimmy/.env \
             -v $HOME/.config/sheetq/:/root/.config/sheetq \
             swimmy >/dev/null
-        if [ "$?" = "0" ]; then
+        if [ $? = 0 ]; then
             echo "done."
         else
-            echo "failed to start swimmy"
+            exit 1
         fi
     fi
-    return 0
 }
 
 function stop(){
-    check_swimmy_condition
-    if [ "$?" = "1" ]; then
-        echo "try to stop swimmy..."
+    if is_container_running swimmy; then
+        echo -n "try to stop swimmy..."
         docker stop swimmy >/dev/null
         docker rm swimmy >/dev/null
-        if [ "$?" = "0" ]; then
+        if [ $? = 0 ]; then
             echo "done."
         else
-            echo "failed to stop swimmy"
+            exit 1
         fi
     else
         echo "swimmy is not running"
     fi
-    return 0
 }
 
 function status(){
-    check_swimmy_condition
-    if [ "$?" = "1" ]; then
+    if is_container_running swimmy; then
         echo "running"
     else
         echo "stop"
     fi
-    return 0
 }
 
-function check_swimmy_condition(){
-    res=$(docker ps -a --format "table {{.Names}}" |grep -cx swimmy)
-    if [ "$res" = "1" ]; then
+function is_container_running(){
+    res=$(docker ps -a --format "table {{.Names}}" |grep -cx "$1")
+    if [ $res = 0 ]; then
         return 1
     else
         return 0
     fi
 }
 
-main $1
+main "$1"
