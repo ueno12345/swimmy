@@ -30,7 +30,6 @@ module Swimmy
             message << result << "\n\n"
           rescue Exception => e
             message << "- 予定を取得できませんでした." << "\n\n"
-            raise e
           end
         end
         client.say(channel: data.channel, text: message)
@@ -39,12 +38,15 @@ module Swimmy
       help do
         title "today_event"
         desc "今日の予定を表示します．"
-        long_desc "'today_event' で今日の予定一覧を表示します．"
+        long_desc "今日の予定を表示します．引数はいりません．"
       end # help message
  
     end # class SayEventsBot
 
     class GetEvents
+      OOB_URI = "urn:ietf:wg:oauth:2.0:oob".freeze
+      SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_READONLY
+
       def initialize()
         @service = Google::Apis::CalendarV3::CalendarService.new
         @service.client_options.application_name = "SWIMMY"
@@ -73,9 +75,6 @@ module Swimmy
       private
       
       def authorize
-        OOB_URI = "urn:ietf:wg:oauth:2.0:oob".freeze
-        SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_READONLY
-
         # https://console.developers.google.com/apis/dashboard
         # からダウンロードして置いておく
         client_id = Google::Auth::ClientId.from_file "config/credentials.json"
