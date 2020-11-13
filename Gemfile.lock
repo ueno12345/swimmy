@@ -113,6 +113,7 @@ GEM
       gli
       hashie
       websocket-driver
+    systemu (2.6.5)
     thor (1.0.1)
     thread_safe (0.3.6)
     timers (4.3.0)
@@ -135,6 +136,7 @@ DEPENDENCIES
   sheetq!
   slack-ruby-bot
   swimmy!
+  systemu
 
 BUNDLED WITH
    2.1.4
