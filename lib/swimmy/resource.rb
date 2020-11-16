@@ -2,6 +2,7 @@ module Swimmy
   module Resource
     dir = File.dirname(__FILE__) + "/resource"
 
+    autoload :Memo,        "#{dir}/memo.rb"
     autoload :Attendance,  "#{dir}/attendance.rb"
     autoload :Place,       "#{dir}/place.rb"
     autoload :Weather,     "#{dir}/weather.rb"
