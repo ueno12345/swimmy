@@ -2,6 +2,7 @@
 #
 # Update swimmy system
 #
+require 'systemu'
 
 module Swimmy
   module Command
@@ -10,13 +11,24 @@ module Swimmy
       command "update" do |client, data, match|
         client.say(channel: data.channel, text: "アップデートを開始します")
 
-        begin
-          system("git pull origin master && bundle install")
+        system('git fetch && [ $(git log --oneline origin/master -1 --pretty=format:"%h") = $(git log -1 --pretty=format:"%h") ]')
+        if $?.success?
+          client.say(channel: data.channel, text:"最新の状態です")
+        else
+          status, stdout, stderr = systemu("git merge --ff-only origin master && bundle install")
 
-          if $?.success?
-              client.say(channel: data.channel, text:"アップデートが完了しました．")
-          else 
-              client.say(channel: data.channel, text:"アップデートに失敗しました．")
+          if status.success?
+            client.say(channel: data.channel, text:"アップデートが完了しました．")
+          else
+            text = <<-"EOS"
+            {
+            アップデートに失敗しました．www"
+             ---------------------------------------
+             "#{stderr}"
+             ---------------------------------------
+            }
+            EOS
+            client.say(channel: data.channel, text:text)
           end
         end
       end
