@@ -80,11 +80,10 @@ module Swimmy
         )
         
         result.items.each do |event|
-          puts event.summary
           start = event.start.date || event.start.date_time
           events.push([start.strftime('%H:%M:%S'), event.summary, calendar_name])
         end
-        puts events
+        
         return events
       end
       
