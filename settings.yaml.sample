@@ -1,5 +1,0 @@
-calendar_list:
-- name: CALENDAR_NAME1
-  calendar_id: CALENDAR_ID1@exsample.com
-- name: CALENDAR_NAME2
-  calendar_id: CALENDAR_ID2@exsample.com

@@ -7,5 +7,6 @@ module Swimmy
     autoload :Place,       "#{dir}/place.rb"
     autoload :Weather,     "#{dir}/weather.rb"
     autoload :Member,      "#{dir}/member.rb"
+    autoload :Calendar,    "#{dir}/calendar.rb"
   end
 end

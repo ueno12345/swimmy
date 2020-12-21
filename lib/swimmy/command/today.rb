@@ -10,32 +10,21 @@ require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'date'
 require 'fileutils'
-require 'yaml'
 require 'active_support/time'
 
 module Swimmy
   module Command
-    class SayEventsBot < Base      
-      command "today_event" do |client, data, match|
+    class Today < Base      
+      command "today" do |client, data, match|
         client.say(channel: data.channel, text: "予定を取得中...")
-        begin 
-          set = YAML.load_file('settings.yaml')
+
+        begin
+          message = "今日(#{Date.today.strftime("%m/%d")})の予定\n"
+          message << GetEvents.new(spreadsheet).message
         rescue => e
-          client.say(channel: data.channel, text: "設定ファイルが見つかりません")
+          message = "予定の取得に失敗しました．"
         end
         
-        calendars = set["calendar_list"]
-        message = "今日(#{Date.today.strftime("%m/%d")})の予定\n"
-        calendars.each do |calendar|
-          message << calendar["name"] << "\n"
-          calendar_id = calendar["calendar_id"]
-          begin
-            result = GetEvents.new().get(calendar_id)
-            message << result << "\n\n"
-          rescue Exception => e
-            message << "- 予定を取得できませんでした." << "\n\n"
-          end
-        end
         client.say(channel: data.channel, text: message)
       end # command message
 
@@ -44,21 +33,44 @@ module Swimmy
         desc "今日の予定を表示します．"
         long_desc "今日の予定を表示します．引数はいりません．"
       end # help message
- 
-    end # class SayEventsBot
+    end # class Today
 
+    
     class GetEvents
+      require 'sheetq'
+      attr_reader :spreadsheet
+      
       OOB_URI = "urn:ietf:wg:oauth:2.0:oob".freeze
       SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_READONLY
 
-      def initialize()
+      def initialize(spreadsheet)
+        @sheet = spreadsheet.sheet("calendar", Swimmy::Resource::Calendar)
         @service = Google::Apis::CalendarV3::CalendarService.new
         @service.client_options.application_name = "SWIMMY"
         @service.authorization = authorize
       end
 
-      def get(calendar_id)
-        msg = ""
+      def message
+        calendars = @sheet.fetch
+        events = []
+        message = ""
+        calendars.each do |calendar|
+          events.concat(get_event(calendar.id, calendar.name))
+        end
+        
+        events = events.sort_by{|x| [x[0], x[1]]}
+        message = "- 今日の予定はありません．\n" if events.empty?
+
+        for time, summary, name in events
+          message << "#{time}: #{summary}(#{name})\n"
+        end
+
+        return message
+      end
+
+      def get_event(calendar_id, calendar_name)
+        events = []
+          
         result = @service.list_events(
           calendar_id,
           single_events: true,
@@ -67,13 +79,13 @@ module Swimmy
           order_by: "startTime"
         )
         
-        msg << "- 予定なし" if result.items.empty?
         result.items.each do |event|
+          puts event.summary
           start = event.start.date || event.start.date_time
-          msg << "#{start.strftime('%H:%M:%S')}: #{event.summary}\n"
+          events.push([start.strftime('%H:%M:%S'), event.summary, calendar_name])
         end
-        
-        return msg
+        puts events
+        return events
       end
       
       private
