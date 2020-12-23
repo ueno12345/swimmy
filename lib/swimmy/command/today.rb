@@ -29,7 +29,7 @@ module Swimmy
       end # command message
 
       help do
-        title "today_event"
+        title "today"
         desc "今日の予定を表示します．"
         long_desc "今日の予定を表示します．引数はいりません．"
       end # help message
