@@ -15,7 +15,9 @@ module Swimmy
         if $?.success?
           client.say(channel: data.channel, text:"最新の状態です")
         else
-          status, stdout, stderr = systemu("git merge --ff-only origin master && bundle install")
+          Bundler.with_clean_env do
+            status, stdout, stderr = systemu("git merge --ff-only origin master && bundle install")
+          end
 
           if status.success?
             client.say(channel: data.channel, text:"アップデートが完了しました．")
