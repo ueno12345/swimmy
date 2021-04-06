@@ -8,5 +8,6 @@ module Swimmy
     autoload :Weather,     "#{dir}/weather.rb"
     autoload :Member,      "#{dir}/member.rb"
     autoload :Calendar,    "#{dir}/calendar.rb"
+    autoload :Anniversary, "#{dir}/anniversary.rb"
   end
 end
