@@ -4,7 +4,7 @@ module Swimmy
     class Pokemon < Swimmy::Command::Base
 
       command "pokemon" do |client, data, match|
-        client.say(channel: data.channel, text: PokemonInfoDisplayer.new.formater)
+        client.say(channel: data.channel, text: PokemonInfoDisplayer.new.style)
       end
 
       help do
@@ -19,33 +19,21 @@ module Swimmy
 
       class PokemonInfoDisplayer
 
-        def formater
-	  pokemon = pokemoninfo_service
+        def style
+          pokemoninfo = Service::Pokemoninfo.new.fetch_info
 
-	  num = format("%03d", pokemon.fetch_pokemon_id)
-          name = pokemon.fetch_pokemon_name
-	  genus = pokemon.fetch_pokemon_genus
-	  type0 = pokemon.fetch_pokemon_type0
-	  type1 = pokemon.fetch_pokemon_type1
-	  height = pokemon.fetch_pokemon_height / 10.0
-	  weight = pokemon.fetch_pokemon_weight / 10.0
-	  flavor_text = pokemon.fetch_pokemon_flavor_text      
-
-          message = "--------------------------------------------------\n"+
-                    "No#{num} #{name}\n"+
-                    "#{genus}\n"+
-		    "タイプ  #{type0} #{type1}\n"+
-		    "たかさ  #{height}m\n"+
-		    "おもさ  #{weight}kg\n"+
-                    "#{flavor_text}\n"+
-                    "--------------------------------------------------\n"+
-		    "https://zukan.pokemon.co.jp/detail/#{num}"
-          message
+          message = <<~EOS
+          --------------------------------------------------
+          No#{format("%03d", pokemoninfo[:number])} #{pokemoninfo[:name]}
+          #{pokemoninfo[:genus]}
+          タイプ  #{pokemoninfo[:type0]} #{pokemoninfo[:type1]}
+          たかさ  #{pokemoninfo[:height].to_i / 10.0}m
+          おもさ  #{pokemoninfo[:weight].to_i / 10.0}kg
+          #{pokemoninfo[:flavor_text]}
+          --------------------------------------------------
+          https://zukan.pokemon.co.jp/detail/#{pokemoninfo[:number]}
+          EOS
         end
-
-        def pokemoninfo_service
-	  Service::Pokemoninfo.new
-	end
 
       end # class PokemonInfoDisplayer
 
