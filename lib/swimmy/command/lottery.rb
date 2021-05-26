@@ -17,9 +17,12 @@ module Swimmy
         title "lottery"
         desc "クジ引きを作ってくれます．"
         long_desc "lottery name1 name2 ...\n" +
-                  "name1, name2 は，参加者名もしくはグループ名です．" +
-                  "グループ名には，%gn のように % で始めて下さい．" +
-                  "全員を表すグループは，%all です．"
+                  "name1, name2 で指定された参加者でくじ引きを行います．\n\n" +
+                  "lottery %<keyword>\n" +
+                  "以下の <keyword> で指定されたメンバーでくじ引きを行います．\n\n" +
+                  "<keyword> (大文字と小文字は区別されません)\n" +
+                  "・学年: B4, M1, M2\n" +
+                  "・グループ: New, GN"
       end
 
       ################################################################
@@ -43,9 +46,10 @@ module Swimmy
               members += all_members.map(&:name)
 
             when /^%(.*)/
-              team = $1.downcase
+              keyword = $1.downcase
               members += all_members.select {|m|
-                m.team.split(/ *, */).map(&:downcase).include?(team)
+                m.team.split(/ *, */).map(&:downcase).include?(keyword) ||
+                m.title.split(/ * /).map(&:downcase).include?(keyword)
               }.map(&:name)
             else
               members << name
