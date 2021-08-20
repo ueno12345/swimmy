@@ -2,6 +2,8 @@ module Swimmy
   module Command
     class At < Swimmy::Command::Base
       OCCURENCES = []
+      RECURRENCES = []
+      FIRST_TICK = true
 
       command "at" do |client, data, match|
 
@@ -13,9 +15,12 @@ module Swimmy
           client.say(channel: data.channel, text: "無効な引数です．")
         else
           client.say(channel: data.channel, text: "予定を追加しています...")
+
+          ss_controller = SpreadSheetController.new(spreadsheet)
           begin
-            ss_controller = SpreadSheetController.new(spreadsheet).add(recurrence)
+            ss_controller.add(recurrence)
             client.say(channel: data.channel, text: "追加しました．")
+            RECURRENCES = ss_controller.read # update recurrence
           rescue
             client.say(channel: data.channel, text: "失敗しました．")
           end
@@ -39,6 +44,11 @@ module Swimmy
       tick do |client, data|
         puts "at command..."
 
+        if FIRST_TICK
+          RECURRENCES = SpreadSheetController.new(spreadsheet).read
+          FIRST_TICK = false
+        end
+
         for occurence in OCCURENCES
           if occurence.should_execute?
             occurence.execute(client)
@@ -47,8 +57,7 @@ module Swimmy
 
         OCCURENCES.clear
 
-        recurrences = SpreadSheetController.new(spreadsheet).read
-        for recurrence in recurrences
+        for recurrence in RECURRENCES
           begin
             occurence = Swimmy::Resource::Occurence.new(recurrence)
             OCCURENCES.append(occurence)

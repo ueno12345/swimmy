@@ -9,7 +9,7 @@ module Swimmy
     autoload :Member,      "#{dir}/member.rb"
     autoload :Calendar,    "#{dir}/calendar.rb"
     autoload :Anniversary, "#{dir}/anniversary.rb"
-    autoload :Recurrence,  "#{dir}/at.rb"
-    autoload :Occurence,   "#{dir}/at.rb"
+    autoload :Recurrence,  "#{dir}/schedule.rb"
+    autoload :Occurence,   "#{dir}/schedule.rb"
   end
 end
