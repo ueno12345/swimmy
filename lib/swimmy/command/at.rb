@@ -1,9 +1,9 @@
 module Swimmy
   module Command
     class At < Swimmy::Command::Base
-      OCCURENCES = []
-      RECURRENCES = []
-      FIRST_TICK = true
+      @@occurences = []
+      @@recurrences = []
+      @@first_tick = true
 
       command "at" do |client, data, match|
 
@@ -20,7 +20,7 @@ module Swimmy
           begin
             ss_controller.add(recurrence)
             client.say(channel: data.channel, text: "追加しました．")
-            RECURRENCES = ss_controller.read # update recurrence
+            @@recurrences = ss_controller.read # update recurrence
           rescue
             client.say(channel: data.channel, text: "失敗しました．")
           end
@@ -44,23 +44,23 @@ module Swimmy
       tick do |client, data|
         puts "at command..."
 
-        if FIRST_TICK
-          RECURRENCES = SpreadSheetController.new(spreadsheet).read
-          FIRST_TICK = false
+        if @@first_tick
+          @@recurrences = SpreadSheetController.new(spreadsheet).read
+          @@first_tick = false
         end
 
-        for occurence in OCCURENCES
+        for occurence in @@occurences
           if occurence.should_execute?
             occurence.execute(client)
           end
         end
 
-        OCCURENCES.clear
+        @@occurences.clear
 
-        for recurrence in RECURRENCES
+        for recurrence in @@recurrences
           begin
             occurence = Swimmy::Resource::Occurence.new(recurrence)
-            OCCURENCES.append(occurence)
+            @@occurences.append(occurence)
           rescue RuntimeError
             # occurence is expired
           end
