@@ -3,9 +3,9 @@ require 'time'
 module Swimmy
   module Resource
     class Recurrence
-      attr_reader :command, :channel, :start_time, :interval
+      attr_reader :command, :channel, :start_time, :interval, :status
 
-      def initialize(command, user_name, channel, start_time, interval)
+      def initialize(command, user_name, channel, start_time, interval, status)
         @command = command
         @user_name = user_name
         @channel = channel
@@ -15,9 +15,19 @@ module Swimmy
             Time.now
           end
         @interval = Interval::from_string(interval)
+        @status ||=
+          if status == "true"
+            true
+          else
+            false
+          end
       end
 
       def self.from_slack(s, user_name, channel)
+
+        if s == nil
+          raise RuntimeError
+        end
         match_data = s.match(/(every (day|week|month|year) )*(.+) do (.+)/)
 
         if (match_data == nil) || (match_data[4] == nil)
@@ -29,18 +39,23 @@ module Swimmy
         channel = channel
         start_time = match_data[3]
         interval = match_data[2]
+        status = "true"
 
-        self.new(command, user_name, channel, start_time, interval)
+        self.new(command, user_name, channel, start_time, interval, status)
       end
 
       def to_a
-        [@command, @user_name, @channel, @start_time.to_s, @interval]
+        [@command, @user_name, @channel, @start_time.to_s, @interval, @status.to_s]
       end
     end # class Recurrence
 
     class Occurence
 
       def initialize(recurrence)
+        if recurrence.status == false
+          raise RuntimeError
+        end
+
         exec_time = calc_next_time(recurrence.start_time, recurrence.interval)
         if exec_time == nil
           raise RuntimeError
