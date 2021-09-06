@@ -15,6 +15,7 @@ module Swimmy
         if $?.success?
           client.say(channel: data.channel, text:"最新の状態です")
         else
+          status, stdout, stderr = nil, nil, nil
           Bundler.with_clean_env do
             status, stdout, stderr = systemu("git merge --ff-only origin master && bundle install")
           end
