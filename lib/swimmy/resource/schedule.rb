@@ -98,7 +98,7 @@ module Swimmy
         when Interval::DAY then
           method = "next_day"
         when Interval::WEEK then
-          method = "next_week"
+          method = "next_day(7)"
         when Interval::MONTH then
           method = "next_month"
         when Interval::YEAR then
@@ -109,7 +109,7 @@ module Swimmy
         time = start_time
         while time < now_time do
           date = time.to_date
-          eval("next_date = date.#{method}")
+          next_date = eval("date.#{method}")
           time_str = "#{next_date.to_s} #{start_time.strftime("%H:%M:%S")}"
           time = Time.parse(time_str)
         end
