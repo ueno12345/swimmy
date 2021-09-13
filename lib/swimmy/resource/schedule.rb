@@ -98,7 +98,7 @@ module Swimmy
         when Interval::DAY then
           method = "next_day"
         when Interval::WEEK then
-          method = "next_week"
+          method = "next_day(7)"
         when Interval::MONTH then
           method = "next_month"
         when Interval::YEAR then
@@ -106,15 +106,15 @@ module Swimmy
         else return nil
         end
 
-        time = start_time
-        while time < now_time do
-          date = time.to_date
-          eval("next_date = date.#{method}")
-          time_str = "#{next_date.to_s} #{start_time.strftime("%H:%M:%S")}"
-          time = Time.parse(time_str)
+        next_time = start_time
+        while next_time < now_time do
+          date = next_time.to_date
+          next_date = eval("date.#{method}")
+          next_time_str = "#{next_date.to_s} #{start_time.strftime("%H:%M:%S")}"
+          next_time = Time.parse(next_time_str)
         end
 
-        return time
+        return next_time
       end
     end # class Occurence
 

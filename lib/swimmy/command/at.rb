@@ -9,20 +9,31 @@ module Swimmy
 
         channel = data.channel
         user_name = client.web_client.users_info(user: data.user).user.real_name
-        begin
-          recurrence = Swimmy::Resource::Recurrence.from_slack(match[:expression], user_name, channel)
-        rescue RuntimeError
-          client.say(channel: data.channel, text: "無効な引数です．")
-        else
-          client.say(channel: data.channel, text: "予定を追加しています...")
+        args = match[:expression]
+        ss_controller = SpreadSheetController.new(spreadsheet)
 
-          ss_controller = SpreadSheetController.new(spreadsheet)
+        if args == "update"
+            client.say(channel: data.channel, text: "実行するコマンドの情報を更新しています")
+            begin
+              @@recurrences = ss_controller.read # update recurrence
+              client.say(channel: data.channel, text: "更新しました．")
+            rescue
+              client.say(channel: data.channel, text: "更新に失敗しました．")
+            end
+        else
           begin
-            ss_controller.add(recurrence)
-            client.say(channel: data.channel, text: "追加しました．")
-            @@recurrences = ss_controller.read # update recurrence
-          rescue
-            client.say(channel: data.channel, text: "失敗しました．")
+            recurrence = Swimmy::Resource::Recurrence.from_slack(args, user_name, channel)
+          rescue RuntimeError
+            client.say(channel: data.channel, text: "無効な引数です．")
+          else
+            client.say(channel: data.channel, text: "予定を追加しています...")
+            begin
+              ss_controller.add(recurrence)
+              client.say(channel: data.channel, text: "追加しました．")
+              @@recurrences = ss_controller.read # update recurrence
+            rescue
+              client.say(channel: data.channel, text: "失敗しました．")
+            end
           end
         end
       end
@@ -39,6 +50,7 @@ module Swimmy
           "    ・year : 毎年\n" +
           "<DateTime> : コマンドを実行する日時を指定してください．" +
           "繰り返し実行の場合，この日時を起点に繰り返し実行が始まります．"
+          "また \"at update\" でスプレッドシートの変更を即座に反映することができます．"
       end
 
       tick do |client, data|
