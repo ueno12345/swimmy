@@ -1,4 +1,5 @@
 require 'time'
+require 'enumdate'
 
 module Swimmy
   module Resource
@@ -50,13 +51,14 @@ module Swimmy
     end # class Recurrence
 
     class Occurence
+      attr_reader :exec_time
 
-      def initialize(recurrence)
+      def initialize(recurrence, standard_time)
         if recurrence.status == false
           raise RuntimeError
         end
 
-        exec_time = calc_next_time(recurrence.start_time, recurrence.interval)
+        exec_time = calc_next_time(recurrence.start_time, standard_time, recurrence.interval)
         if exec_time == nil
           raise RuntimeError
         end
@@ -66,8 +68,8 @@ module Swimmy
         @exec_time = exec_time
       end
 
-      def should_execute?
-        if @exec_time <= Time.now
+      def should_execute?(deadline)
+        if @exec_time <= deadline
           return true
         else
           return false
@@ -85,34 +87,39 @@ module Swimmy
       end
 
       private
-      def calc_next_time(start_time, interval)
+      def calc_next_time(start_time, standard_time,interval)
 
-        now_time = Time.now
-        if now_time < start_time
+        if standard_time <= start_time
           return start_time
         end
 
+        date_enumerator = nil
         case interval
         when Interval::ONCE then
-          return nil
+          date_enumerator = nil
         when Interval::DAY then
-          method = "next_day"
+          date_enumerator = Enumdate.daily(start_time.to_date).forward_to(standard_time.to_date)
         when Interval::WEEK then
-          method = "next_day(7)"
+          date_enumerator = Enumdate.weekly(start_time.to_date).forward_to(standard_time.to_date)
         when Interval::MONTH then
-          method = "next_month"
+          date_enumerator = Enumdate.monthly_by_day(start_time.to_date).forward_to(standard_time.to_date)
         when Interval::YEAR then
-          method = "next_year"
-        else return nil
+          date_enumerator = Enumdate.yearly_by_day(start_time.to_date).forward_to(standard_time.to_date)
+        else
+          date_enumerator = nil
         end
 
-        next_time = start_time
-        while next_time < now_time do
-          date = next_time.to_date
-          next_date = eval("date.#{method}")
-          next_time_str = "#{next_date.to_s} #{start_time.strftime("%H:%M:%S")}"
-          next_time = Time.parse(next_time_str)
+        if date_enumerator == nil then
+          return nil
         end
+
+        next_time ||=
+          date_enumerator.each do |date|
+            time = Time.parse("#{date.to_s} #{start_time.strftime("%T %z")}")
+            if time > standard_time then
+              break time
+            end
+          end
 
         return next_time
       end
