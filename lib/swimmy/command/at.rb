@@ -56,13 +56,15 @@ module Swimmy
       tick do |client, data|
         puts "at command..."
 
+        now = Time.now
+
         if @@first_tick
           @@recurrences = SpreadSheetController.new(spreadsheet).read
           @@first_tick = false
         end
 
         for occurence in @@occurences
-          if occurence.should_execute?
+          if occurence.should_execute?(now)
             occurence.execute(client)
           end
         end
@@ -71,7 +73,7 @@ module Swimmy
 
         for recurrence in @@recurrences
           begin
-            occurence = Swimmy::Resource::Occurence.new(recurrence)
+            occurence = Swimmy::Resource::Occurence.new(recurrence, now)
             @@occurences.append(occurence)
           rescue RuntimeError
             # occurence is expired
