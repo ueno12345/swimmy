@@ -45,6 +45,7 @@ module Swimmy
           "[every <Interbal>] : この要素が指定された場合，コマンドを繰り返し実行します．\n" +
           "<Interval> : 繰り返しの間隔を以下の中から指定してください．\n" +
           "    ・day : 毎日\n" +
+          "    ・weekday : 毎日(平日のみ)\n" +
           "    ・week : 毎週\n" +
           "    ・month : 毎月\n" +
           "    ・year : 毎年\n" +

@@ -29,7 +29,7 @@ module Swimmy
         if s == nil
           raise RuntimeError
         end
-        match_data = s.match(/(every (day|week|month|year) )*(.+) do (.+)/)
+        match_data = s.match(/(every (day|weekday|week|month|year) )*(.+) do (.+)/)
 
         if (match_data == nil) || (match_data[4] == nil)
           raise RuntimeError
@@ -93,18 +93,29 @@ module Swimmy
           return start_time
         end
 
+        st = start_time.to_date
+        sd = standard_time.to_date
         date_enumerator = nil
         case interval
         when Interval::ONCE then
           date_enumerator = nil
         when Interval::DAY then
-          date_enumerator = Enumdate.daily(start_time.to_date).forward_to(standard_time.to_date)
+          date_enumerator = Enumdate.daily(st).forward_to(sd)
+        when Interval::WDAY then
+          date_enumerator =
+            (Enumdate::EnumMerger.new() \
+              << Enumdate.weekly(st, wday: 1).forward_to(sd) \
+              << Enumdate.weekly(st, wday: 2).forward_to(sd) \
+              << Enumdate.weekly(st, wday: 3).forward_to(sd) \
+              << Enumdate.weekly(st, wday: 4).forward_to(sd) \
+              << Enumdate.weekly(st, wday: 5).forward_to(sd) \
+            )
         when Interval::WEEK then
-          date_enumerator = Enumdate.weekly(start_time.to_date).forward_to(standard_time.to_date)
+          date_enumerator = Enumdate.weekly(st).forward_to(sd)
         when Interval::MONTH then
-          date_enumerator = Enumdate.monthly_by_day(start_time.to_date).forward_to(standard_time.to_date)
+          date_enumerator = Enumdate.monthly_by_day(st).forward_to(sd)
         when Interval::YEAR then
-          date_enumerator = Enumdate.yearly_by_day(start_time.to_date).forward_to(standard_time.to_date)
+          date_enumerator = Enumdate.yearly_by_day(st).forward_to(sd)
         else
           date_enumerator = nil
         end
@@ -128,6 +139,7 @@ module Swimmy
     module Interval
       ONCE  = "Once"
       DAY   = "Every Day"
+      WDAY  = "Every WeekDay"
       WEEK  = "Every Week"
       MONTH = "Every Month"
       YEAR  = "Every Year"
@@ -136,6 +148,7 @@ module Swimmy
         case s
         when nil, "Once" then ONCE
         when "day", "Every Day" then DAY
+        when "weekday", "Every WeekDay" then WDAY
         when "week", "Every Week" then WEEK
         when "month", "Every Month" then MONTH
         when "year", "Every Year" then YEAR
@@ -145,7 +158,7 @@ module Swimmy
       module_function :from_string
 
       def valid?(s)
-        if (s != ONCE) && (s != DAY) && (s != WEEK) && (s != MONTH) && (s != YEAR)
+        if (s != ONCE) && (s != DAY) && (s != WDAY) && (s != WEEK) && (s != MONTH) && (s != YEAR)
           false
         else
           true
