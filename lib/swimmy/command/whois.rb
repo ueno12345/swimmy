@@ -13,11 +13,11 @@ module Swimmy
         end
       end
 
-  help do
+      help do
         title "whois"
         desc "アカウント名から学生番号と氏名とメールアドレスを教えてくれる．"
         long_desc "whois account\n" +
-                  "account で指定された参加者の情報を教えます．\n\n"
+                  "account で指定された研究室メンバの情報を教えます．\n\n"
       end
 
       ################################################################
